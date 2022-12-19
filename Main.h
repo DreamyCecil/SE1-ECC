@@ -39,6 +39,9 @@ extern FILE *_fExports;
 extern char *_strFileNameBase;
 extern char *_strFileNameBaseIdentifier;
 
+// Entity component flags
+#define CF_EDITOR (1UL<<1)
+
 struct SType {
   char *strString;
   int bCrossesStates;

@@ -49,5 +49,11 @@
     <CustomBuild Include="110_Scanner.l">
       <Filter>Source Files\Grammar files</Filter>
     </CustomBuild>
+    <CustomBuild Include="150_Scanner.l">
+      <Filter>Source Files\Grammar files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="150_Parser.y">
+      <Filter>Source Files\Grammar files</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>
