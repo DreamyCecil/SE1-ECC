@@ -1,5 +1,4 @@
 %{
-// rcg10042001 Changed to specify Ecc directory...
 #include "StdH.h"
 #include "Main.h"
 #include "Parser.h"
