@@ -7,12 +7,15 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Classics|Win32 = Classics|Win32
 		SE150|Win32 = SE150|Win32
+		SSR|Win32 = SSR|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{1F46FD81-1A15-7E2C-7C68-84AB43BC0B05}.Classics|Win32.ActiveCfg = Classics|Win32
 		{1F46FD81-1A15-7E2C-7C68-84AB43BC0B05}.Classics|Win32.Build.0 = Classics|Win32
 		{1F46FD81-1A15-7E2C-7C68-84AB43BC0B05}.SE150|Win32.ActiveCfg = SE150|Win32
 		{1F46FD81-1A15-7E2C-7C68-84AB43BC0B05}.SE150|Win32.Build.0 = SE150|Win32
+		{1F46FD81-1A15-7E2C-7C68-84AB43BC0B05}.SSR|Win32.ActiveCfg = SSR|Win32
+		{1F46FD81-1A15-7E2C-7C68-84AB43BC0B05}.SSR|Win32.Build.0 = SSR|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

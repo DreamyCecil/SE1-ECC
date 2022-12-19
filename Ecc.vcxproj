@@ -9,12 +9,19 @@
       <Configuration>SE150</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="SSR|Win32">
+      <Configuration>SSR</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1F46FD81-1A15-7E2C-7C68-84AB43BC0B05}</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'" Label="Configuration">
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'" Label="Configuration">
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'" Label="Configuration">
@@ -24,6 +31,10 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
   </ImportGroup>
@@ -38,6 +49,12 @@
     <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
     <IntDir>Obj\$(Configuration)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">
+    <ExecutablePath>$(SolutionDir)Tools.Win32;$(ExecutablePath)</ExecutablePath>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
+    <IntDir>Obj\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">
     <ExecutablePath>$(SolutionDir)Tools.Win32;$(ExecutablePath)</ExecutablePath>
     <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
@@ -45,6 +62,16 @@
     <IntDir>Obj\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <Optimization>MaxSpeed</Optimization>
@@ -72,29 +99,41 @@ bison -oParser.c %(Filename).y -d
 popd
 copy %(RootDir)%(Directory)Parser.c %(RootDir)%(Directory)Parser.cpp
 del %(RootDir)%(Directory)Parser.c /q</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">pushd $(ProjectDir)
+bison -oParser.c %(Filename).y -d
+popd
+copy %(RootDir)%(Directory)Parser.c %(RootDir)%(Directory)Parser.cpp
+del %(RootDir)%(Directory)Parser.c /q</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">pushd $(ProjectDir)
 bison -oParser.c %(Filename).y -d
 popd
 copy %(RootDir)%(Directory)Parser.c %(RootDir)%(Directory)Parser.cpp
 del %(RootDir)%(Directory)Parser.c /q</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">Creating parser source</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">Creating parser source</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">Creating parser source</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">Parser.cpp;Parser.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">Parser.cpp;Parser.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">Parser.cpp;Parser.h;%(Outputs)</Outputs>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="110_Scanner.l">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">flex -o%(RootDir)%(Directory)Scanner.cpp %(RootDir)%(Directory)%(Filename).l</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">flex -o%(RootDir)%(Directory)Scanner.cpp %(RootDir)%(Directory)%(Filename).l</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">flex -o%(RootDir)%(Directory)Scanner.cpp %(RootDir)%(Directory)%(Filename).l</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">Scanner.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">Scanner.cpp;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">Scanner.cpp;%(Outputs)</Outputs>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Parser.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Main.cpp" />
@@ -117,12 +156,71 @@ popd
 copy %(RootDir)%(Directory)Parser.c %(RootDir)%(Directory)Parser.cpp
 del %(RootDir)%(Directory)Parser.c /q</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">pushd $(ProjectDir)
+bison -oParser.c %(Filename).y -d
+popd
+copy %(RootDir)%(Directory)Parser.c %(RootDir)%(Directory)Parser.cpp
+del %(RootDir)%(Directory)Parser.c /q</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">pushd $(ProjectDir)
+bison -oParser.c %(Filename).y -d
+popd
+copy %(RootDir)%(Directory)Parser.c %(RootDir)%(Directory)Parser.cpp
+del %(RootDir)%(Directory)Parser.c /q</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">Creating parser source</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">Creating parser source</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">Parser.cpp;Parser.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">Parser.cpp;Parser.h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="150_Scanner.l">
       <FileType>Document</FileType>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">Scanner.cpp;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">flex -o%(RootDir)%(Directory)Scanner.cpp %(RootDir)%(Directory)%(Filename).l</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">true</ExcludedFromBuild>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">Scanner.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">Scanner.cpp;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">flex -o%(RootDir)%(Directory)Scanner.cpp %(RootDir)%(Directory)%(Filename).l</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">flex -o%(RootDir)%(Directory)Scanner.cpp %(RootDir)%(Directory)%(Filename).l</Command>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="SSR_Parser.y">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">pushd $(ProjectDir)
+bison -oParser.c %(Filename).y -d
+popd
+copy %(RootDir)%(Directory)Parser.c %(RootDir)%(Directory)Parser.cpp
+del %(RootDir)%(Directory)Parser.c /q</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">pushd $(ProjectDir)
+bison -oParser.c %(Filename).y -d
+popd
+copy %(RootDir)%(Directory)Parser.c %(RootDir)%(Directory)Parser.cpp
+del %(RootDir)%(Directory)Parser.c /q</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">pushd $(ProjectDir)
+bison -oParser.c %(Filename).y -d
+popd
+copy %(RootDir)%(Directory)Parser.c %(RootDir)%(Directory)Parser.cpp
+del %(RootDir)%(Directory)Parser.c /q</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">Creating parser source</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">Creating parser source</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">Creating parser source</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">Parser.cpp;Parser.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">Parser.cpp;Parser.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">Parser.cpp;Parser.h;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">true</ExcludedFromBuild>
+    </CustomBuild>
+    <CustomBuild Include="SSR_Scanner.l">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">Scanner.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">Scanner.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">Scanner.cpp;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">flex -o%(RootDir)%(Directory)Scanner.cpp %(RootDir)%(Directory)%(Filename).l</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">flex -o%(RootDir)%(Directory)Scanner.cpp %(RootDir)%(Directory)%(Filename).l</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">flex -o%(RootDir)%(Directory)Scanner.cpp %(RootDir)%(Directory)%(Filename).l</Command>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
