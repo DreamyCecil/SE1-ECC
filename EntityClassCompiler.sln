@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ecc", "Ecc.vcxproj", "{1F46FD81-1A15-7E2C-7C68-84AB43BC0B05}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EntityClassCompiler", "EntityClassCompiler.vcxproj", "{1F46FD81-1A15-7E2C-7C68-84AB43BC0B05}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
