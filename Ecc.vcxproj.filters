@@ -5,9 +5,6 @@
       <UniqueIdentifier>{acd5aeef-9312-4c06-9a18-ffc69148b586}</UniqueIdentifier>
       <Extensions>cpp</Extensions>
     </Filter>
-    <Filter Include="Source Files\Grammar files">
-      <UniqueIdentifier>{97120739-0d00-462f-bb75-be637f0e69f3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Dummy">
       <UniqueIdentifier>{414eb5ab-c891-41f1-85bb-3594afce7081}</UniqueIdentifier>
       <Extensions>c</Extensions>
@@ -15,6 +12,10 @@
     <Filter Include="Header Files">
       <UniqueIdentifier>{aebfcf57-f684-490f-baf9-b3c0fd748e23}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;fi;fd</Extensions>
+    </Filter>
+    <Filter Include="Compiler Files">
+      <UniqueIdentifier>{97120739-0d00-462f-bb75-be637f0e69f3}</UniqueIdentifier>
+      <Extensions>y;l</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -44,28 +45,28 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="110_Parser.y">
-      <Filter>Source Files\Grammar files</Filter>
+      <Filter>Compiler Files</Filter>
     </CustomBuild>
     <CustomBuild Include="110_Scanner.l">
-      <Filter>Source Files\Grammar files</Filter>
+      <Filter>Compiler Files</Filter>
     </CustomBuild>
     <CustomBuild Include="150_Scanner.l">
-      <Filter>Source Files\Grammar files</Filter>
+      <Filter>Compiler Files</Filter>
     </CustomBuild>
     <CustomBuild Include="150_Parser.y">
-      <Filter>Source Files\Grammar files</Filter>
+      <Filter>Compiler Files</Filter>
     </CustomBuild>
     <CustomBuild Include="SSR_Scanner.l">
-      <Filter>Source Files\Grammar files</Filter>
+      <Filter>Compiler Files</Filter>
     </CustomBuild>
     <CustomBuild Include="SSR_Parser.y">
-      <Filter>Source Files\Grammar files</Filter>
+      <Filter>Compiler Files</Filter>
     </CustomBuild>
     <CustomBuild Include="NEW_Parser.y">
-      <Filter>Source Files\Grammar files</Filter>
+      <Filter>Compiler Files</Filter>
     </CustomBuild>
     <CustomBuild Include="NEW_Scanner.l">
-      <Filter>Source Files\Grammar files</Filter>
+      <Filter>Compiler Files</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>
