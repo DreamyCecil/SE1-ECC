@@ -50,6 +50,9 @@ Debug/
 Bin/*
 Obj/*
 
+# Build tools
+!Tools.Win32/*
+
 # Generated source files
 Parser.cpp
 Parser.h
