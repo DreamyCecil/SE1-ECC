@@ -160,6 +160,9 @@ void DeclareFeatureProperties(void)
 /* specially bracketed cpp blocks */
 %token cppblock
 
+/* [Cecil] Preprocessor directive */
+%token preproc
+
 /* standard cpp-keywords */
 %token k_while
 %token k_for
@@ -584,6 +587,12 @@ empty_property_declaration_list
 
 property_declaration
   : property_id property_type property_identifier property_wed_name_opt property_default_opt property_flags_opt {
+    /* [Cecil] Disallow using 255 as a property ID */
+    int iPropertyID = atoi(_strCurrentPropertyID);
+    if (iPropertyID == 255) {
+      yyerror((SType("property ID 255 may conflict with 'm_penPrediction', property: ")+$3).strString);
+    }
+
     fprintf(_fTables, " CEntityProperty(%s, %s, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, %s, %s),\n",
       _strCurrentPropertyPropertyType,
       _strCurrentPropertyEnumType,
@@ -800,6 +809,7 @@ property_default_opt
   }
   | '=' property_default_expression {
     if (strcmp(_strCurrentPropertyDataType,"CEntityPointer")==0)  {
+      _strCurrentPropertyDefaultCode = (SType(_strCurrentPropertyIdentifier)+" = NULL;").strString;
       yyerror("CEntityPointer type properties always default to NULL");
     } else {
       _strCurrentPropertyDefaultCode = (SType(_strCurrentPropertyIdentifier)+" = "+$2.strString+";").strString;
@@ -874,7 +884,13 @@ function_list
   ;
 
 function_implementation
-  : opt_export opt_virtual return_type opt_tilde identifier '(' parameters_list ')' opt_const
+  : preproc {
+    /* [Cecil] Preprocessor directives inbetween functions */
+    char *strPreproc = $1.strString;
+    fprintf(_fDeclaration, "%s", strPreproc);
+    fprintf(_fImplementation, "%s", strPreproc);
+  }
+  | opt_export opt_virtual return_type opt_tilde identifier '(' parameters_list ')' opt_const
   '{' statements '}' opt_semicolon {
     char *strReturnType = $3.strString;
     char *strFunctionHeader = ($4+$5+$6+$7+$8+$9).strString;
@@ -1077,6 +1093,7 @@ statement
   | k_case case_constant_expression ':' {$$=$1+" "+$2+$3+" ";}
   | '{' statements '}' {$$=$1+$2+$3;}
   | expression '{' statements '}' {$$=$1+$2+$3+$4;}
+  | preproc { $$ = $1; } /* [Cecil] Inline preprocessor directives */
   | statement_while
   | statement_dowhile
   | statement_for
