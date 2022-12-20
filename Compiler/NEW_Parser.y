@@ -43,6 +43,7 @@ static char _strCurrentStateID[256];
 static int _bInProcedure;   // set if currently compiling a procedure
 static int _bInHandler;
 static int _bHasOtherwise;  // set if current 'wait' block has an 'otherwise' statement
+static int _bInlineFunc; // [Cecil] Define an inline function
 
 static char *_strCurrentEvent;
 static int _bFeature_AbstractBaseClass;
@@ -182,6 +183,7 @@ void DeclareFeatureProperties(void)
 %token k_autowait
 %token k_autocall
 %token k_waitevent
+%token k_inline /* [Cecil] Inline functions */
 
 /* aditional keywords */
 %token k_event
@@ -890,11 +892,11 @@ function_implementation
     fprintf(_fDeclaration, "%s", strPreproc);
     fprintf(_fImplementation, "%s", strPreproc);
   }
-  | opt_export opt_virtual return_type opt_tilde identifier '(' parameters_list ')' opt_const
-  '{' statements '}' opt_semicolon {
+  | opt_export opt_modifier return_type opt_tilde identifier '(' parameters_list ')' opt_const
+  opt_funcbody opt_semicolon {
     char *strReturnType = $3.strString;
     char *strFunctionHeader = ($4+$5+$6+$7+$8+$9).strString;
-    char *strFunctionBody = ($10+$11+$12).strString;
+    char *strFunctionBody = $10.strString;
     if (strcmp($5.strString, _strCurrentClass)==0) {
       if (strcmp(strReturnType+strlen(strReturnType)-4, "void")==0 ) {
         strReturnType = "";
@@ -902,10 +904,23 @@ function_implementation
         yyerror("use 'void' as return type for constructors");
       }
     }
-    fprintf(_fDeclaration, " %s %s %s %s;\n", 
-      $1.strString, $2.strString, strReturnType, strFunctionHeader);
-    fprintf(_fImplementation, "  %s %s::%s %s\n", 
-      strReturnType, _strCurrentClass, strFunctionHeader, strFunctionBody);
+    /* [Cecil] Declaration beginning */
+    fprintf(_fDeclaration, " %s %s %s %s", $1.strString, $2.strString, strReturnType, strFunctionHeader);
+
+    /* [Cecil] No implementation if no function body */
+    if (strcmp(strFunctionBody, "") != 0) {
+      /* [Cecil] Inline implementation */
+      if (_bInlineFunc) {
+        fprintf(_fDeclaration, " %s", strFunctionBody);
+      } else {
+        fprintf(_fImplementation, "  %s %s::%s %s\n", 
+          strReturnType, _strCurrentClass, strFunctionHeader, strFunctionBody);
+      }
+    }
+
+    /* [Cecil] Declaration ending */
+    fprintf(_fDeclaration, ";\n");
+    _bInlineFunc = 0;
   }
   ;
 opt_tilde
@@ -928,9 +943,15 @@ opt_const
   : { $$ = "";}
   | k_const { $$ = $1; }
   ;
-opt_virtual
+/* [Cecil] Function modifier */
+opt_modifier
   : { $$ = "";}
   | k_virtual { $$ = $1; }
+  /* [Cecil] Inline function definition */
+  | k_inline {
+    _bInlineFunc = 1;
+    $$ = $1;
+  }
   ;
 opt_semicolon
   : /* null */
@@ -952,6 +973,12 @@ parameter_declaration
 return_type 
   : any_type
   | k_void
+  ;
+
+/* [Cecil] Optional function body */
+opt_funcbody
+  : { $$ = ""; }
+  | '{' statements '}' { $$ = $1+$2+$3; }
   ;
 
 any_type
