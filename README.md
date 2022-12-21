@@ -11,6 +11,8 @@ Compiled executables are compatible with any version of Serious Engine 1.
 
 This project can be built using any Microsoft Visual Studio starting with 6.0 (`C++98`). The project files are created for Visual Studio 2010 and newer.
 
+If you want to build ECC for [Serious Engine 1 Mod SDK](https://github.com/DreamyCecil/SE1-ModSDK), select the `ClassicsEnhanced` configuration, which is designed to be used specifically with that SDK.
+
 ## License
 
 This project is licensed under GNU GPL v2 (see LICENSE file).
