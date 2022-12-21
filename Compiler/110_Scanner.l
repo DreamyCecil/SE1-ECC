@@ -1,6 +1,5 @@
 %{
 #include "StdH.h"
-#include "Main.h"
 #include "Parser.h"
 
 #define YY_NEVER_INTERACTIVE 1

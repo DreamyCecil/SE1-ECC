@@ -1,6 +1,5 @@
 %{
 #include "StdH.h"
-#include "Main.h"
 
 static char *_strCurrentClass;
 static int _iCurrentClassID;

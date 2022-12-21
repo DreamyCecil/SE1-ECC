@@ -190,6 +190,7 @@ del %(RootDir)%(Directory)..\Parser.c /q</Command>
   <ItemGroup>
     <ClInclude Include="Main.h" />
     <ClInclude Include="StdH.h" />
+    <ClInclude Include="StringType.h" />
     <ClInclude Include="unistd.h" />
   </ItemGroup>
   <ItemGroup>

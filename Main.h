@@ -1,4 +1,4 @@
-/* Copyright (c) 2002-2012 Croteam Ltd. 
+/* Copyright (c) 2002-2012 Croteam Ltd.
 This program is free software; you can redistribute it and/or modify
 it under the terms of version 2 of the GNU General Public License as published by
 the Free Software Foundation
@@ -13,73 +13,39 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
+// [Cecil] Moved under a separate file
+#include "StringType.h"
 
-/* rcg10042001 */
+// rcg10042001
 #ifdef PLATFORM_WIN32
-#define alloca _alloca
+  #define alloca _alloca
 #endif
 
 #ifndef MAXPATHLEN
-#define MAXPATHLEN 256
+  #define MAXPATHLEN 256
 #endif
 
-extern int yylex(void);
-extern void yyerror(char *s);
-extern int yyparse(void);
+// Parser methods
+int yylex(void);
+int yyparse(void);
 
-extern FILE *_fInput;
+// Report error during parsing
+void yyerror(char *s);
+
 extern int _iLinesCt;
-extern int _bTrackLineInformation;   // this is set if #line should be inserted in tokens
-extern char *_strInputFileName;
+extern int _bTrackLineInformation; // This is set if #line should be inserted in tokens
 
 extern FILE *_fImplementation;
 extern FILE *_fDeclaration;
 extern FILE *_fTables;
-extern FILE *_fExports;
 extern char *_strFileNameBase;
 extern char *_strFileNameBaseIdentifier;
 
 // Entity component flags
-#define CF_EDITOR (1UL<<1)
+#define CF_EDITOR (1UL << 1)
 
-struct SType {
-  char *strString;
-  int bCrossesStates;
-  int iLine;
-
-  SType(void) {
-    strString = strdup("");
-    bCrossesStates = 0;
-    iLine = -1;
-  };
-  SType(const char *str) {
-    strString = strdup(str);
-    bCrossesStates = 0;
-    iLine = -1;
-  };
-  SType(const SType &other) {
-    strString = strdup(other.strString);
-    bCrossesStates = other.bCrossesStates;
-    iLine = other.iLine;
-  };
-  const SType &operator=(const SType &other) {
-    strString = strdup(other.strString);
-    bCrossesStates = other.bCrossesStates;
-    iLine = other.iLine;
-    return *this;
-  };
-  const SType &operator=(char *str) {
-    strString = strdup(str);
-    bCrossesStates = 0;
-    iLine = -1;
-    return *this;
-  };
-  SType operator+(const SType &other);
-};
-
-#define YYSTYPE SType
-
-// [Cecil] Declare method globally
+// [Cecil] Declare methods globally
+char *stradd(const char *str1, const char *str2);
 char *LineDirective(int bNewLine);
 
 // [Cecil] Moved out of the parser file

@@ -1,6 +1,5 @@
 %{
 #include "StdH.h"
-#include "Main.h"
 
 static char *_strCurrentClass;
 static int _iCurrentClassID;
@@ -347,7 +346,6 @@ event_declaration
 
     char strBuffer[256];
     sprintf(strBuffer, "  &DLLEvent_%s,\n", _strCurrentEvent);
-    extern char *stradd(char *str1, char *str2);
     _strCurrentEventList = stradd(strBuffer, _strCurrentEventList);
     _strCurrentEventCheck = strdup("");
 
@@ -377,7 +375,6 @@ event_member
     if (strcmp($1.strString, "CEntityID")==0) {
       char strBuffer[256];
       sprintf(strBuffer, "&& %s.IsValid()", $2.strString);
-      extern char *stradd(char *str1, char *str2);
       _strCurrentEventCheck = stradd(_strCurrentEventCheck, strBuffer);
     }
   }

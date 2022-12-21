@@ -1,6 +1,5 @@
 %{
 #include "StdH.h"
-#include "Main.h"
 
 static char *_strCurrentClass;
 static int _iCurrentClassID;
@@ -164,7 +163,6 @@ void DeclareFeatureProperties(void)
 %token k_autowait
 %token k_autocall
 %token k_waitevent
-%token k_inline /* [Cecil] Inline functions */
 
 /* aditional keywords */
 %token k_event
@@ -889,7 +887,7 @@ function_implementation
     fprintf(_fDeclaration, " %s %s %s %s", $1.strString, $2.strString, strReturnType, strFunctionHeader);
 
     /* [Cecil] No implementation if no function body */
-    if (strcmp(strFunctionBody, "") != 0) {
+    if (strlen(strFunctionBody) > 0) {
       /* [Cecil] Inline implementation */
       if (_bInlineFunc) {
         fprintf(_fDeclaration, " %s", strFunctionBody);

@@ -1,6 +1,5 @@
 %{
 #include "StdH.h"
-#include "Main.h"
 #include "Parser.h"
 
 #define YY_NEVER_INTERACTIVE 1
@@ -55,7 +54,6 @@ EXP_FLT (({DIGIT}+("."({DIGIT}*)?)?)("E"|"e")("+"|"-")?{DIGIT}+)
 "autowait"  {RETURN(k_autowait);}
 "autocall"  {RETURN(k_autocall);}
 "waitevent" {RETURN(k_waitevent);}
-"inline"    {RETURN(k_inline);} /* [Cecil] Inline functions */
 
  /* aditional keywords */
 "event"     {RETURN(k_event);}

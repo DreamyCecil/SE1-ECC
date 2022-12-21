@@ -23,8 +23,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <math.h>
 
 #ifdef PLATFORM_UNIX
-#include <errno.h>
-#include <sys/param.h>
-#include <unistd.h>
-#define _fullpath(x, y, z) realpath(y, x)
+  #include <errno.h>
+  #include <sys/param.h>
+  #include <unistd.h>
+  #define _fullpath(x, y, z) realpath(y, x)
 #endif
+
+// [Cecil] Include main elements
+#include "Main.h"
