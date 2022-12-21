@@ -78,3 +78,10 @@ struct SType {
 };
 
 #define YYSTYPE SType
+
+// [Cecil] Declare method globally
+char *LineDirective(int bNewLine);
+
+// [Cecil] Moved out of the parser file
+char *RemoveLineDirective(char *str);
+char *GetLineDirective(SType &st);

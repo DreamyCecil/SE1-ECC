@@ -56,12 +56,46 @@ char *stradd(char *str1, char *str2, char *str3)
   return strResult;
 }
 
-char *LineDirective(int i)
+// [Cecil] Replaced index with a flag for starting with a line break
+char *LineDirective(int bNewLine)
 {
-  char str[256];
-  sprintf(str, "\n#line %d %s\n", i, _strInputFileName);
-  return strdup(str);
-}
+  static char str[256];
+
+  // [Cecil] No line directives
+  if (_bRemoveLineDirective) {
+    str[0] = '\0';
+    return str;
+  }
+
+  // [Cecil] Use line counter instead of an index and surround the filename with quotes
+  sprintf(str, "%s#line %d \"%s\"\n", (bNewLine ? "\n" : ""), _iLinesCt, _strInputFileName);
+
+  // [Cecil] Return pointer to the static array to not waste memory
+  return str;
+};
+
+// [Cecil] Moved out of the parser file
+char *RemoveLineDirective(char *str) {
+  if (str[0] == '\n' && str[1] == '#') {
+    return strchr(str + 2, '\n') + 1;
+  }
+
+  return str;
+};
+
+// [Cecil] Moved out of the parser file
+char *GetLineDirective(SType &st) {
+  char *str = st.strString;
+
+  if (str[0] == '\n' && str[1] == '#' && str[2] == 'l') {
+    char *strResult = strdup(str);
+    strchr(strResult + 3, '\n')[1] = '\0';
+
+    return strResult;
+  }
+
+  return "";
+};
 
 SType SType::operator+(const SType &other)
 {
@@ -132,98 +166,9 @@ void TranslateBackSlashes(char *str)
   }
 }
 
-#define READSIZE  1024
-/* Relpace File and remove #line directive from file */
-void ReplaceFileRL(const char *strOld, const char *strNew)
-{
-  char strOldBuff[READSIZE*3+1];
-  char strNewBuff[READSIZE+1];
-  int iOldch=0;
-  FILE *pfNew = NULL;
-  FILE *pfOld = NULL;
-  bool bQuotes = 0;
-  bool bComment = 0;
-
-  // open files
-  pfNew = fopen(strNew,"rb");
-  if(!pfNew) goto Error;
-  pfOld = fopen(strOld,"wb");
-  if(!pfOld) goto Error;
-
-  // until eof
-  while(!feof(pfNew))
-  {
-    // clear buffers
-    memset(&strOldBuff,0,sizeof(strOldBuff));
-    memset(&strNewBuff,0,sizeof(strNewBuff));
-
-    iOldch = 0;
-    bQuotes = 0;
-    bComment = 0;
-
-    // read one line from file
-    int iRead = fread(strNewBuff,1,READSIZE,pfNew);
-    char *chLineEnd = strchr(strNewBuff,13);
-    if(chLineEnd) *(chLineEnd+2) = 0;
-    // get line length
-    int ctch = strlen(strNewBuff);
-    int iSeek = -iRead+ctch;
-    // seek file for extra characters read
-    if(iSeek!=0) fseek(pfNew,iSeek ,SEEK_CUR);
-    if(strncmp(strNewBuff,"#line",5)==0)
-    {
-      continue;
-    }
-
-    // process each charachter
-    for(int ich=0;ich<ctch;ich++)
-    {
-      char *pchOld = &strOldBuff[iOldch];
-      char *pchNew = &strNewBuff[ich];
-
-      if((*pchNew == '{') || (*pchNew == '}') || *pchNew == ';')
-      {
-        if((!bComment) && (!bQuotes) && (*(pchNew+1) != 13))
-        {
-          strOldBuff[iOldch++] = strNewBuff[ich];
-          strOldBuff[iOldch++] = 13;
-          strOldBuff[iOldch++] = 10;
-          continue;
-        }
-      }
-      if(*pchNew == '"')
-      {
-        // if this is quote
-        if((ich>0) && (*(pchNew-1)=='\\')) { }
-        else bQuotes = !bQuotes;
-      }
-      else if((*pchNew == '/') && (*(pchNew+1) == '/'))
-      {
-        // if this is comment
-        bComment = 1;
-      }
-      strOldBuff[iOldch++] = strNewBuff[ich];
-    }
-    fwrite(&strOldBuff,1,iOldch,pfOld);
-  }
-
-  if(pfNew) fclose(pfNew);
-  if(pfOld) fclose(pfOld);
-  remove(strNew);
-  return;
-Error:
-  if(pfNew) fclose(pfNew);
-  if(pfOld) fclose(pfOld);
-}
-
 /* Replace a file with a new file. */
 void ReplaceFile(const char *strOld, const char *strNew)
 {
-  if(_bRemoveLineDirective)
-  {
-    ReplaceFileRL(strOld,strNew);
-    return;
-  }
   remove(strOld);
   rename(strNew, strOld);
 }

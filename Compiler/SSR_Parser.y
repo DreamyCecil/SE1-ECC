@@ -73,25 +73,6 @@ SType Braces(int iBraces) {
   strBraces[iBraces] = 0;
   return SType(strBraces);
 }
-char *RemoveLineDirective(char *str) 
-{
-  if (str[0]=='\n' && str[1]=='#') {
-    return strchr(str+2, '\n')+1;
-  } else {
-    return str;
-  }
-}
-char *GetLineDirective(SType &st) 
-{
-  char *str = st.strString;
-  if (str[0]=='\n' && str[1]=='#' && str[2]=='l') {
-    char *strResult = strdup(str);
-    strchr(strResult+3,'\n')[1] = 0;
-    return strResult;
-  } else {
-    return "";
-  }
-}
 void AddHandlerFunction(char *strProcedureName, int iStateID)
 {
   fprintf(_fDeclaration, "  BOOL %s(const CEntityEvent &__eeInput);\n", strProcedureName);
