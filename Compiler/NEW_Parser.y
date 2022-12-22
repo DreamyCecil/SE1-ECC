@@ -278,6 +278,9 @@ uses_statement
   : k_uses c_string ';' {
     char *strUsedFileName = strdup($2.strString);
     strUsedFileName[strlen(strUsedFileName)-1] = 0;
+
+    /* [Cecil] Print line directive before the used header */
+    fprintf(_fDeclaration, LineDirective(true));
     fprintf(_fDeclaration, "#include <%s.h>\n", strUsedFileName+1);
   }
   ;
