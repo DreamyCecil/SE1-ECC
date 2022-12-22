@@ -237,6 +237,9 @@ program
     fprintf(_fDeclaration, "#ifndef _%s_INCLUDED\n", _strFileNameBaseIdentifier);
     fprintf(_fDeclaration, "#define _%s_INCLUDED 1\n", _strFileNameBaseIdentifier);
 
+    /* [Cecil] Include header with ECC extras */
+    fprintf(_fDeclaration, "#include <EccExtras.h>\n");
+
   } opt_global_cppblock {
 
     //fprintf(_fImplementation, "\n#undef DECL_DLL\n#define DECL_DLL _declspec(dllimport)\n");
