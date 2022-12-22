@@ -20,6 +20,9 @@ static char *_strCurrentPropertyColor;
 static char *_strCurrentPropertyFlags;
 static char *_strCurrentPropertyDefaultCode;
 
+// [Cecil] Entity event list
+static char *_strCurrentEventList;
+
 static char *_strCurrentComponentIdentifier;
 static char *_strCurrentComponentType;
 static char *_strCurrentComponentID;     
@@ -248,6 +251,9 @@ program
 
     fprintf(_fImplementation, "#include <%s.h>\n", _strFileNameBase);
     fprintf(_fImplementation, "#include <%s_tables.h>\n", _strFileNameBase);
+    /* [Cecil] Reset event list */
+    _strCurrentEventList = strdup("");
+
   } enum_and_event_declarations_list {
   } opt_global_cppblock {
   } opt_class_declaration {
@@ -327,8 +333,23 @@ event_declaration
       "CEntityEvent *peeCopy = new %s(*this); "
       "return peeCopy;}\n",
       _strCurrentEvent, _strCurrentEvent);
-    fprintf(_fImplementation, "%s::%s() : CEntityEvent(EVENTCODE_%s) {;\n",
+    fprintf(_fImplementation, "%s::%s() : CEntityEvent(EVENTCODE_%s) {\n",
       _strCurrentEvent, _strCurrentEvent, _strCurrentEvent);
+
+    /* [Cecil] Define an event constructor */
+    fprintf(_fTables, "CEntityEvent *%s_New(void) { return new %s; };\n", _strCurrentEvent, _strCurrentEvent);
+
+    /* [Cecil] Define a library event with an extra class size field */
+    fprintf(_fTables, 
+      "CDLLEntityEvent DLLEvent_%s = {\n"
+      "  0x%08x, &%s_New, sizeof(%s)\n"
+      "};\n",
+      _strCurrentEvent, iID, _strCurrentEvent, _strCurrentEvent);
+
+    char strBuffer[256];
+    sprintf(strBuffer, "  &DLLEvent_%s,\n", _strCurrentEvent);
+    _strCurrentEventList = stradd(strBuffer, _strCurrentEventList);
+
   } '{' event_members_list opt_comma '}' ';' {
     fprintf(_fImplementation, "};\n");
     fprintf(_fDeclaration, "};\n");
@@ -370,6 +391,19 @@ class_declaration
     _strCurrentBase = $4.strString;
     _strCurrentDescription = $7.strString;
     _strCurrentThumbnail = $10.strString;
+
+    /* [Cecil] Define an entity event table to export */
+    if (strlen(_strCurrentEventList) > 0) {
+      fprintf(_fTables, "CDLLEntityEvent *%s_events[] = {\n%s};\n", _strCurrentClass, _strCurrentEventList);
+      fprintf(_fTables, "INDEX %s_eventsct = ARRAYCOUNT(%s_events);\n", _strCurrentClass, _strCurrentClass);
+    } else {
+      fprintf(_fTables, "CDLLEntityEvent *%s_events[] = {NULL};\n", _strCurrentClass);
+      fprintf(_fTables, "INDEX %s_eventsct = 0;\n", _strCurrentClass);
+    }
+
+    /* [Cecil] Declare event list in the header since it's unavailable via CDLLEntityClass before 1.50 */
+    fprintf(_fDeclaration, "extern \"C\" DECL_DLL CDLLEntityEvent *%s_events[];\n", _strCurrentClass);
+    fprintf(_fDeclaration, "extern \"C\" DECL_DLL INDEX %s_eventsct;\n\n", _strCurrentClass);
 
     fprintf(_fTables, "#define ENTITYCLASS %s\n\n", _strCurrentClass);
     fprintf(_fDeclaration, "extern \"C\" DECL_DLL CDLLEntityClass %s_DLLClass;\n",
