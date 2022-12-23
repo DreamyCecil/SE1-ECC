@@ -494,6 +494,9 @@ class_declaration
       _strCurrentDescription, _strCurrentThumbnail, _iCurrentClassID);
     fprintf(_fTables, "DECLARE_CTFILENAME(_fnm%s_tbn, %s);\n", _strCurrentClass, _strCurrentThumbnail);
 
+    /* [Cecil] Create an entity table entry */
+    fprintf(_fTables, "\nENTITYTABLEENTRY(%s);\n", _strCurrentClass);
+
     fprintf(_fDeclaration, "};\n");
   }
   ;
