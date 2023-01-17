@@ -240,9 +240,20 @@ int main(int argc, char *argv[]) {
   _strFileNameBase = ChangeExt(strFileName, "");
   _strFileNameBaseIdentifier = strdup(_strFileNameBase);
 
-  // Replace slashes with underscores in the identifier
-  ReplaceChar(_strFileNameBaseIdentifier, '/', '_');
-  ReplaceChar(_strFileNameBaseIdentifier, '\\', '_');
+  // [Cecil] Replace all non-alphanumeric characters
+  {
+    char *strFile = _strFileNameBaseIdentifier;
+
+    while (*strFile != '\0') {
+      char &ch = *strFile;
+
+      if (ch != '_' && !isalnum(ch)) {
+        ch = '_';
+      }
+
+      ++strFile;
+    }
+  }
 
   // Print file headers
   PrintHeader(_fImplementation);
