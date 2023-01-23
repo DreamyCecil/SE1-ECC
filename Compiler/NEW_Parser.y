@@ -23,6 +23,9 @@ static char *_strCurrentPropertyDefaultCode;
 // [Cecil] Entity event list
 static char *_strCurrentEventList;
 
+// [Cecil] Entity property list
+static char *_strCurrentPropertyList;
+
 static char *_strCurrentComponentIdentifier;
 static char *_strCurrentComponentType;
 static char *_strCurrentComponentID;     
@@ -117,11 +120,11 @@ void DeclareFeatureProperties(void)
       "0",
       "0",
       "0");
-    fprintf(_fDeclaration, "  %s %s;\n",
-      "CEntityPointer",
-      "m_penPrediction"
-      );
+    fprintf(_fDeclaration, "  CEntityPointer m_penPrediction;\n");
     fprintf(_fImplementation, "  m_penPrediction = NULL;\n");
+
+    /* [Cecil] Add property identifier into the list */
+    _strCurrentPropertyList = stradd(_strCurrentPropertyList, "  \"m_penPrediction\",\n");
   }
 }
 
@@ -251,8 +254,9 @@ program
 
     fprintf(_fImplementation, "#include <%s.h>\n", _strFileNameBase);
     fprintf(_fImplementation, "#include <%s_tables.h>\n", _strFileNameBase);
-    /* [Cecil] Reset event list */
+    /* [Cecil] Reset lists */
     _strCurrentEventList = strdup("");
+    _strCurrentPropertyList = strdup("");
 
   } enum_and_event_declarations_list {
   } opt_global_cppblock {
@@ -407,6 +411,10 @@ class_declaration
     /* [Cecil] Declare event list in the header since it's unavailable via CDLLEntityClass before 1.50 */
     fprintf(_fDeclaration, "extern \"C\" DECL_DLL CDLLEntityEvent *%s_events[];\n", _strCurrentClass);
     fprintf(_fDeclaration, "extern \"C\" DECL_DLL INDEX %s_eventsct;\n\n", _strCurrentClass);
+
+    /* [Cecil] Declare list of entity property identifiers */
+    fprintf(_fDeclaration, "extern \"C\" DECL_DLL const char *%s_propnames[];\n", _strCurrentClass);
+    fprintf(_fDeclaration, "extern \"C\" DECL_DLL INDEX %s_propnamesct;\n\n", _strCurrentClass);
 
     fprintf(_fTables, "#define ENTITYCLASS %s\n\n", _strCurrentClass);
     fprintf(_fDeclaration, "extern \"C\" DECL_DLL CDLLEntityClass %s_DLLClass;\n",
@@ -589,16 +597,21 @@ property_declaration_list
   : empty_property_declaration_list {
     DeclareFeatureProperties(); // this won't work, but at least it will generate an error!!!!
     fprintf(_fTables, "  CEntityProperty()\n};\n");
-    fprintf(_fTables, "#define %s_propertiesct 0\n", _strCurrentClass);
-    fprintf(_fTables, "\n");
-    fprintf(_fTables, "\n");
+    fprintf(_fTables, "#define %s_propertiesct 0\n\n\n", _strCurrentClass);
+
+    /* [Cecil] Define empty list of entity property identifiers */
+    fprintf(_fTables, "const char *%s_propnames[] = {\"\"};\n", _strCurrentClass);
+    fprintf(_fTables, "INDEX %s_propnamesct = 0;\n\n", _strCurrentClass);
   }
   | nonempty_property_declaration_list opt_comma {
     DeclareFeatureProperties();
     fprintf(_fTables, "};\n");
-    fprintf(_fTables, "#define %s_propertiesct ARRAYCOUNT(%s_properties)\n", 
+    fprintf(_fTables, "#define %s_propertiesct ARRAYCOUNT(%s_properties)\n\n", 
       _strCurrentClass, _strCurrentClass);
-    fprintf(_fTables, "\n");
+
+    /* [Cecil] Define list of entity property identifiers */
+    fprintf(_fTables, "const char *%s_propnames[] = {\n%s};\n", _strCurrentClass, _strCurrentPropertyList);
+    fprintf(_fTables, "INDEX %s_propnamesct = ARRAYCOUNT(%s_propnames);\n\n", _strCurrentClass, _strCurrentClass);
   }
   ;
 nonempty_property_declaration_list
@@ -628,10 +641,15 @@ property_declaration
       _strCurrentPropertyShortcut,
       _strCurrentPropertyColor,
       _strCurrentPropertyFlags);
+
     fprintf(_fDeclaration, "  %s %s;\n",
       _strCurrentPropertyDataType,
-      _strCurrentPropertyIdentifier
-      );
+      _strCurrentPropertyIdentifier);
+
+    /* [Cecil] Add property identifier into the list */
+    char strPropInList[1024];
+    sprintf(strPropInList, "  \"%s\",\n", _strCurrentPropertyIdentifier);
+    _strCurrentPropertyList = stradd(_strCurrentPropertyList, strPropInList);
 
     if (strlen(_strCurrentPropertyDefaultCode)>0) {
       fprintf(_fImplementation, "  %s\n", _strCurrentPropertyDefaultCode);
