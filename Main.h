@@ -51,3 +51,8 @@ char *LineDirective(int bNewLine);
 // [Cecil] Moved out of the parser file
 char *RemoveLineDirective(char *str);
 char *GetLineDirective(SType &st);
+
+// [Cecil] Special printing methods
+void PrintDecl(const char *strFormat, ...);
+void PrintImpl(const char *strFormat, ...);
+void PrintTable(const char *strFormat, ...);

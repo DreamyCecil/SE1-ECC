@@ -95,6 +95,28 @@ char *GetLineDirective(SType &st) {
   return "";
 };
 
+// [Cecil] Special printing methods
+void PrintDecl(const char *strFormat, ...) {
+  va_list arg;
+  va_start(arg, strFormat);
+  vfprintf(_fDeclaration, strFormat, arg);
+  va_end(arg);
+};
+
+void PrintImpl(const char *strFormat, ...) {
+  va_list arg;
+  va_start(arg, strFormat);
+  vfprintf(_fImplementation, strFormat, arg);
+  va_end(arg);
+};
+
+void PrintTable(const char *strFormat, ...) {
+  va_list arg;
+  va_start(arg, strFormat);
+  vfprintf(_fTables, strFormat, arg);
+  va_end(arg);
+};
+
 // Report error during parsing
 void yyerror(char *s) {
   fprintf(stderr, "%s(%d): Error: %s\n", _strInputFileName, _iLinesCt, s);

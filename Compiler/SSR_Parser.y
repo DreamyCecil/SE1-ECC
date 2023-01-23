@@ -74,8 +74,8 @@ SType Braces(int iBraces) {
 }
 void AddHandlerFunction(char *strProcedureName, int iStateID)
 {
-  fprintf(_fDeclaration, "  BOOL %s(const CEntityEvent &__eeInput);\n", strProcedureName);
-  fprintf(_fTables, " {0x%08x, -1, CEntity::pEventHandler(&%s::%s), "
+  PrintDecl("  BOOL %s(const CEntityEvent &__eeInput);\n", strProcedureName);
+  PrintTable(" {0x%08x, -1, CEntity::pEventHandler(&%s::%s), "
     "DEBUGSTRING(\"%s::%s\")},\n",
     iStateID, _strCurrentClass, strProcedureName, _strCurrentClass, strProcedureName);
 }
@@ -83,8 +83,8 @@ void AddHandlerFunction(char *strProcedureName, int iStateID)
 
 void AddHandlerFunction(char *strProcedureName, char *strStateID, char *strBaseStateID)
 {
-  fprintf(_fDeclaration, "  BOOL %s(const CEntityEvent &__eeInput);\n", strProcedureName);
-  fprintf(_fTables, " {%s, %s, CEntity::pEventHandler(&%s::%s),"
+  PrintDecl("  BOOL %s(const CEntityEvent &__eeInput);\n", strProcedureName);
+  PrintTable(" {%s, %s, CEntity::pEventHandler(&%s::%s),"
     "DEBUGSTRING(\"%s::%s\")},\n",
     strStateID, strBaseStateID, _strCurrentClass, strProcedureName,
     _strCurrentClass, RemoveLineDirective(strProcedureName));
@@ -104,7 +104,7 @@ void CreateInternalHandlerFunction(char *strFunctionName, char *strID)
 void DeclareFeatureProperties(void)
 {
   if (_bFeature_CanBePredictable) {
-    fprintf(_fTables, " CEntityProperty(CEntityProperty::EPT_ENTITYPTR, NULL, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, \"%s\", %s, %s),\n",
+    PrintTable(" CEntityProperty(CEntityProperty::EPT_ENTITYPTR, NULL, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, \"%s\", %s, %s),\n",
       _iCurrentClassID,
       "255",
       _strCurrentClass,
@@ -114,11 +114,11 @@ void DeclareFeatureProperties(void)
       "m_penPrediction", /* [Cecil] Property name in the code */
       "0",
       "0");
-    fprintf(_fDeclaration, "  %s %s;\n",
+    PrintDecl("  %s %s;\n",
       "CEntityPointer",
       "m_penPrediction"
       );
-    fprintf(_fImplementation, "  m_penPrediction = NULL;\n");
+    PrintImpl("  m_penPrediction = NULL;\n");
   }
 }
 
@@ -233,21 +233,21 @@ program
     }
     _iCurrentClassID = iID;
     _iNextFreeID = iID<<16;
-    fprintf(_fDeclaration, "#ifndef _%s_INCLUDED\n", _strFileNameBaseIdentifier);
-    fprintf(_fDeclaration, "#define _%s_INCLUDED 1\n", _strFileNameBaseIdentifier);
+    PrintDecl("#ifndef _%s_INCLUDED\n", _strFileNameBaseIdentifier);
+    PrintDecl("#define _%s_INCLUDED 1\n", _strFileNameBaseIdentifier);
 
   } opt_global_cppblock {
 
-    //fprintf(_fImplementation, "\n#undef DECL_DLL\n#define DECL_DLL _declspec(dllimport)\n");
+    //PrintImpl("\n#undef DECL_DLL\n#define DECL_DLL _declspec(dllimport)\n");
   } uses_list {
-    //fprintf(_fImplementation, "\n#undef DECL_DLL\n#define DECL_DLL _declspec(dllexport)\n");
+    //PrintImpl("\n#undef DECL_DLL\n#define DECL_DLL _declspec(dllexport)\n");
 
-    fprintf(_fImplementation, "#include <%s.h>\n", _strFileNameBase);
-    fprintf(_fImplementation, "#include <%s_tables.h>\n", _strFileNameBase);
+    PrintImpl("#include <%s.h>\n", _strFileNameBase);
+    PrintImpl("#include <%s_tables.h>\n", _strFileNameBase);
   } enum_and_event_declarations_list {
   } opt_global_cppblock {
   } opt_class_declaration {
-    fprintf(_fDeclaration, "#endif // _%s_INCLUDED\n", _strFileNameBaseIdentifier);
+    PrintDecl("#endif // _%s_INCLUDED\n", _strFileNameBaseIdentifier);
   }
   ;
 
@@ -257,7 +257,7 @@ program
  */
 opt_global_cppblock
   : /* null */
-  | cppblock { fprintf(_fImplementation, "%s\n", $1.strString); }
+  | cppblock { PrintImpl("%s\n", $1.strString); }
   ;
 
 uses_list
@@ -268,7 +268,7 @@ uses_statement
   : k_uses c_string ';' {
     char *strUsedFileName = strdup($2.strString);
     strUsedFileName[strlen(strUsedFileName)-1] = 0;
-    fprintf(_fDeclaration, "#include <%s.h>\n", strUsedFileName+1);
+    PrintDecl("#include <%s.h>\n", strUsedFileName+1);
   }
   ;
 
@@ -284,13 +284,13 @@ enum_and_event_declarations_list
 enum_declaration
   : k_enum identifier { 
     _strCurrentEnum = $2.strString;
-    fprintf(_fTables, "EP_ENUMBEG(%s)\n", _strCurrentEnum );
-    fprintf(_fDeclaration, "extern DECL_DLL CEntityPropertyEnumType %s_enum;\n", _strCurrentEnum );
-    fprintf(_fDeclaration, "enum %s {\n", _strCurrentEnum );
+    PrintTable("EP_ENUMBEG(%s)\n", _strCurrentEnum );
+    PrintDecl("extern DECL_DLL CEntityPropertyEnumType %s_enum;\n", _strCurrentEnum );
+    PrintDecl("enum %s {\n", _strCurrentEnum );
   } '{' enum_values_list opt_comma '}' ';' {
-    fprintf(_fTables, "EP_ENUMEND(%s);\n\n", _strCurrentEnum);
-    fprintf(_fDeclaration, "};\n");
-    fprintf(_fDeclaration, "DECL_DLL inline void ClearToDefault(%s &e) { e = (%s)0; } ;\n", _strCurrentEnum, _strCurrentEnum);
+    PrintTable("EP_ENUMEND(%s);\n\n", _strCurrentEnum);
+    PrintDecl("};\n");
+    PrintDecl("DECL_DLL inline void ClearToDefault(%s &e) { e = (%s)0; } ;\n", _strCurrentEnum, _strCurrentEnum);
   }
   ;
 opt_comma : /*null*/ | ',';
@@ -301,8 +301,8 @@ enum_values_list
 
 enum_value
   : c_int identifier c_string {
-    fprintf(_fTables, "  EP_ENUMVALUE(%s, %s),\n", $2.strString, $3.strString);
-    fprintf(_fDeclaration, "  %s = %s,\n", $2.strString, $1.strString);
+    PrintTable("  EP_ENUMVALUE(%s, %s),\n", $2.strString, $3.strString);
+    PrintDecl("  %s = %s,\n", $2.strString, $1.strString);
   }
   ;
 
@@ -313,22 +313,22 @@ event_declaration
   : k_event identifier { 
     _strCurrentEvent = $2.strString;
     int iID = CreateID();
-    fprintf(_fDeclaration, "#define EVENTCODE_%s 0x%08x\n", _strCurrentEvent, iID);
-    fprintf(_fDeclaration, "class DECL_DLL %s : public CEntityEvent {\npublic:\n",
+    PrintDecl("#define EVENTCODE_%s 0x%08x\n", _strCurrentEvent, iID);
+    PrintDecl("class DECL_DLL %s : public CEntityEvent {\npublic:\n",
       _strCurrentEvent);
-    fprintf(_fDeclaration, "%s();\n", _strCurrentEvent );
-    fprintf(_fDeclaration, "CEntityEvent *MakeCopy(void);\n");
-    fprintf(_fImplementation, 
+    PrintDecl("%s();\n", _strCurrentEvent );
+    PrintDecl("CEntityEvent *MakeCopy(void);\n");
+    PrintImpl(
       "CEntityEvent *%s::MakeCopy(void) { "
       "CEntityEvent *peeCopy = new %s(*this); "
       "return peeCopy;}\n",
       _strCurrentEvent, _strCurrentEvent);
-    fprintf(_fImplementation, "%s::%s() : CEntityEvent(EVENTCODE_%s) {;\n",
+    PrintImpl("%s::%s() : CEntityEvent(EVENTCODE_%s) {;\n",
       _strCurrentEvent, _strCurrentEvent, _strCurrentEvent);
   } '{' event_members_list opt_comma '}' ';' {
-    fprintf(_fImplementation, "};\n");
-    fprintf(_fDeclaration, "};\n");
-    fprintf(_fDeclaration, "DECL_DLL inline void ClearToDefault(%s &e) { e = %s(); } ;\n", _strCurrentEvent, _strCurrentEvent);
+    PrintImpl("};\n");
+    PrintDecl("};\n");
+    PrintDecl("DECL_DLL inline void ClearToDefault(%s &e) { e = %s(); } ;\n", _strCurrentEvent, _strCurrentEvent);
   }
   ;
 
@@ -344,8 +344,8 @@ non_empty_event_members_list
 
 event_member
   : any_type identifier {
-    fprintf(_fDeclaration, "%s %s;\n", $1.strString, $2.strString);
-    fprintf(_fImplementation, " ClearToDefault(%s);\n", $2.strString);
+    PrintDecl("%s %s;\n", $1.strString, $2.strString);
+    PrintImpl(" ClearToDefault(%s);\n", $2.strString);
   }
   ;
 
@@ -367,25 +367,25 @@ class_declaration
     _strCurrentDescription = $7.strString;
     _strCurrentThumbnail = $10.strString;
 
-    fprintf(_fTables, "#define ENTITYCLASS %s\n\n", _strCurrentClass);
-    fprintf(_fDeclaration, "extern \"C\" DECL_DLL CDLLEntityClass %s_DLLClass;\n",
+    PrintTable("#define ENTITYCLASS %s\n\n", _strCurrentClass);
+    PrintDecl("extern \"C\" DECL_DLL CDLLEntityClass %s_DLLClass;\n",
       _strCurrentClass);
-    fprintf(_fDeclaration, "%s %s : public %s {\npublic:\n",
+    PrintDecl("%s %s : public %s {\npublic:\n",
       $1.strString, _strCurrentClass, _strCurrentBase);
 
   } opt_features {
-    fprintf(_fDeclaration, "  %s virtual void SetDefaultProperties(void);\n", _bClassIsExported?"":"DECL_DLL");
-    fprintf(_fImplementation, "void %s::SetDefaultProperties(void) {\n", _strCurrentClass);
-    fprintf(_fTables, "CEntityProperty %s_properties[] = {\n", _strCurrentClass);
+    PrintDecl("  %s virtual void SetDefaultProperties(void);\n", _bClassIsExported?"":"DECL_DLL");
+    PrintImpl("void %s::SetDefaultProperties(void) {\n", _strCurrentClass);
+    PrintTable("CEntityProperty %s_properties[] = {\n", _strCurrentClass);
 
   } k_properties ':' property_declaration_list {
-    fprintf(_fImplementation, "  %s::SetDefaultProperties();\n}\n", _strCurrentBase);
+    PrintImpl("  %s::SetDefaultProperties();\n}\n", _strCurrentBase);
 
-    fprintf(_fTables, "CEntityComponent %s_components[] = {\n", _strCurrentClass);
+    PrintTable("CEntityComponent %s_components[] = {\n", _strCurrentClass);
   } opt_internal_properties {
   } k_components ':' component_declaration_list {
     _bTrackLineInformation = 1;
-    fprintf(_fTables, "CEventHandlerEntry %s_handlers[] = {\n", _strCurrentClass);
+    PrintTable("CEventHandlerEntry %s_handlers[] = {\n", _strCurrentClass);
 
     _bInProcedure = 0;
     _bInHandler = 0;
@@ -394,66 +394,66 @@ class_declaration
     _bInProcedure = 1;
   } k_procedures ':' procedure_list {
   } '}' ';' {
-    fprintf(_fTables, "};\n#define %s_handlersct ARRAYCOUNT(%s_handlers)\n", 
+    PrintTable("};\n#define %s_handlersct ARRAYCOUNT(%s_handlers)\n", 
       _strCurrentClass, _strCurrentClass);
-    fprintf(_fTables, "\n");
+    PrintTable("\n");
 
     if (_bFeature_AbstractBaseClass) {
-      fprintf(_fTables, "CEntity *%s_New(void) { return NULL; };\n",
+      PrintTable("CEntity *%s_New(void) { return NULL; };\n",
         _strCurrentClass);
     } else {
-      fprintf(_fTables, "CEntity *%s_New(void) { return new %s; };\n",
+      PrintTable("CEntity *%s_New(void) { return new %s; };\n",
         _strCurrentClass, _strCurrentClass);
     }
 
     if (!_bFeature_ImplementsOnInitClass) {
-      fprintf(_fTables, "void %s_OnInitClass(void) {};\n", _strCurrentClass);
+      PrintTable("void %s_OnInitClass(void) {};\n", _strCurrentClass);
     } else {
-      fprintf(_fTables, "void %s_OnInitClass(void);\n", _strCurrentClass);
+      PrintTable("void %s_OnInitClass(void);\n", _strCurrentClass);
     }
 
     if (!_bFeature_ImplementsOnEndClass) {
-      fprintf(_fTables, "void %s_OnEndClass(void) {};\n", _strCurrentClass);
+      PrintTable("void %s_OnEndClass(void) {};\n", _strCurrentClass);
     } else {
-      fprintf(_fTables, "void %s_OnEndClass(void);\n", _strCurrentClass);
+      PrintTable("void %s_OnEndClass(void);\n", _strCurrentClass);
     }
 
     if (!_bFeature_ImplementsOnPrecache) {
-      fprintf(_fTables, "void %s_OnPrecache(CDLLEntityClass *pdec, INDEX iUser) {};\n", _strCurrentClass);
+      PrintTable("void %s_OnPrecache(CDLLEntityClass *pdec, INDEX iUser) {};\n", _strCurrentClass);
     } else {
-      fprintf(_fTables, "void %s_OnPrecache(CDLLEntityClass *pdec, INDEX iUser);\n", _strCurrentClass);
+      PrintTable("void %s_OnPrecache(CDLLEntityClass *pdec, INDEX iUser);\n", _strCurrentClass);
     }
 
     if (!_bFeature_ImplementsOnWorldEnd) {
-      fprintf(_fTables, "void %s_OnWorldEnd(CWorld *pwo) {};\n", _strCurrentClass);
+      PrintTable("void %s_OnWorldEnd(CWorld *pwo) {};\n", _strCurrentClass);
     } else {
-      fprintf(_fTables, "void %s_OnWorldEnd(CWorld *pwo);\n", _strCurrentClass);
+      PrintTable("void %s_OnWorldEnd(CWorld *pwo);\n", _strCurrentClass);
     }
 
     if (!_bFeature_ImplementsOnWorldInit) {
-      fprintf(_fTables, "void %s_OnWorldInit(CWorld *pwo) {};\n", _strCurrentClass);
+      PrintTable("void %s_OnWorldInit(CWorld *pwo) {};\n", _strCurrentClass);
     } else {
-      fprintf(_fTables, "void %s_OnWorldInit(CWorld *pwo);\n", _strCurrentClass);
+      PrintTable("void %s_OnWorldInit(CWorld *pwo);\n", _strCurrentClass);
     }
 
     if (!_bFeature_ImplementsOnWorldTick) {
-      fprintf(_fTables, "void %s_OnWorldTick(CWorld *pwo) {};\n", _strCurrentClass);
+      PrintTable("void %s_OnWorldTick(CWorld *pwo) {};\n", _strCurrentClass);
     } else {
-      fprintf(_fTables, "void %s_OnWorldTick(CWorld *pwo);\n", _strCurrentClass);
+      PrintTable("void %s_OnWorldTick(CWorld *pwo);\n", _strCurrentClass);
     }
 
     if (!_bFeature_ImplementsOnWorldRender) {
-      fprintf(_fTables, "void %s_OnWorldRender(CWorld *pwo) {};\n", _strCurrentClass);
+      PrintTable("void %s_OnWorldRender(CWorld *pwo) {};\n", _strCurrentClass);
     } else {
-      fprintf(_fTables, "void %s_OnWorldRender(CWorld *pwo);\n", _strCurrentClass);
+      PrintTable("void %s_OnWorldRender(CWorld *pwo);\n", _strCurrentClass);
     }
 
-    fprintf(_fTables, "ENTITY_CLASSDEFINITION(%s, %s, %s, %s, 0x%08x);\n",
+    PrintTable("ENTITY_CLASSDEFINITION(%s, %s, %s, %s, 0x%08x);\n",
       _strCurrentClass, _strCurrentBase, 
       _strCurrentDescription, _strCurrentThumbnail, _iCurrentClassID);
-    fprintf(_fTables, "DECLARE_CTFILENAME(_fnm%s_tbn, %s);\n", _strCurrentClass, _strCurrentThumbnail);
+    PrintTable("DECLARE_CTFILENAME(_fnm%s_tbn, %s);\n", _strCurrentClass, _strCurrentThumbnail);
 
-    fprintf(_fDeclaration, "};\n");
+    PrintDecl("};\n");
   }
   ;
 
@@ -485,23 +485,23 @@ feature
     if (strcmp($1.strString, "\"AbstractBaseClass\"")==0) {
       _bFeature_AbstractBaseClass = 1;
     } else if (strcmp($1.strString, "\"IsTargetable\"")==0) {
-      fprintf(_fDeclaration, "virtual BOOL IsTargetable(void) const { return TRUE; };\n");
+      PrintDecl("virtual BOOL IsTargetable(void) const { return TRUE; };\n");
     } else if (strcmp($1.strString, "\"IsImportant\"")==0) {
-      fprintf(_fDeclaration, "virtual BOOL IsImportant(void) const { return TRUE; };\n");
+      PrintDecl("virtual BOOL IsImportant(void) const { return TRUE; };\n");
     } else if (strcmp($1.strString, "\"HasName\"")==0) {
-      fprintf(_fDeclaration, 
+      PrintDecl(
         "virtual const CTString &GetName(void) const { return m_strName; };\n");
     } else if (strcmp($1.strString, "\"CanBePredictable\"")==0) {
-      fprintf(_fDeclaration, 
+      PrintDecl(
         "virtual CEntity *GetPredictionPair(void) { return m_penPrediction; };\n");
-      fprintf(_fDeclaration, 
+      PrintDecl(
         "virtual void SetPredictionPair(CEntity *penPair) { m_penPrediction = penPair; };\n");
       _bFeature_CanBePredictable = 1;
     } else if (strcmp($1.strString, "\"HasDescription\"")==0) {
-      fprintf(_fDeclaration, 
+      PrintDecl(
         "virtual const CTString &GetDescription(void) const { return m_strDescription; };\n");
     } else if (strcmp($1.strString, "\"HasTarget\"")==0) {
-      fprintf(_fDeclaration, 
+      PrintDecl(
         "virtual CEntity *GetTarget(void) const { return m_penTarget; };\n");
     } else if (strcmp($1.strString, "\"ImplementsOnInitClass\"")==0) {
       _bFeature_ImplementsOnInitClass = 1;
@@ -533,7 +533,7 @@ internal_property_list
   ;
 internal_property
   : any_type identifier ';' { 
-    fprintf(_fDeclaration, "%s %s;\n", $1.strString, $2.strString);
+    PrintDecl("%s %s;\n", $1.strString, $2.strString);
   }
   ;
 
@@ -544,17 +544,17 @@ internal_property
 property_declaration_list
   : empty_property_declaration_list {
     DeclareFeatureProperties(); // this won't work, but at least it will generate an error!!!!
-    fprintf(_fTables, "  CEntityProperty()\n};\n");
-    fprintf(_fTables, "#define %s_propertiesct 0\n", _strCurrentClass);
-    fprintf(_fTables, "\n");
-    fprintf(_fTables, "\n");
+    PrintTable("  CEntityProperty()\n};\n");
+    PrintTable("#define %s_propertiesct 0\n", _strCurrentClass);
+    PrintTable("\n");
+    PrintTable("\n");
   }
   | nonempty_property_declaration_list opt_comma {
     DeclareFeatureProperties();
-    fprintf(_fTables, "};\n");
-    fprintf(_fTables, "#define %s_propertiesct ARRAYCOUNT(%s_properties)\n", 
+    PrintTable("};\n");
+    PrintTable("#define %s_propertiesct ARRAYCOUNT(%s_properties)\n", 
       _strCurrentClass, _strCurrentClass);
-    fprintf(_fTables, "\n");
+    PrintTable("\n");
   }
   ;
 nonempty_property_declaration_list
@@ -567,7 +567,7 @@ empty_property_declaration_list
 
 property_declaration
   : property_id property_type property_identifier property_wed_name_opt property_default_opt property_flags_opt {
-    fprintf(_fTables, " CEntityProperty(%s, %s, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, \"%s\", %s, %s),\n",
+    PrintTable(" CEntityProperty(%s, %s, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, \"%s\", %s, %s),\n",
       _strCurrentPropertyPropertyType,
       _strCurrentPropertyEnumType,
       _iCurrentClassID,
@@ -579,13 +579,13 @@ property_declaration
       _strCurrentPropertyIdentifier, /* [Cecil] Property name in the code */
       _strCurrentPropertyColor,
       _strCurrentPropertyFlags);
-    fprintf(_fDeclaration, "  %s %s;\n",
+    PrintDecl("  %s %s;\n",
       _strCurrentPropertyDataType,
       _strCurrentPropertyIdentifier
       );
 
     if (strlen(_strCurrentPropertyDefaultCode)>0) {
-      fprintf(_fImplementation, "  %s\n", _strCurrentPropertyDefaultCode);
+      PrintImpl("  %s\n", _strCurrentPropertyDefaultCode);
     }
   }
   ;
@@ -814,16 +814,16 @@ property_default_expression
  */
 component_declaration_list
   : empty_component_declaration_list {
-    fprintf(_fTables, "  CEntityComponent()\n};\n");
-    fprintf(_fTables, "#define %s_componentsct 0\n", _strCurrentClass);
-    fprintf(_fTables, "\n");
-    fprintf(_fTables, "\n");
+    PrintTable("  CEntityComponent()\n};\n");
+    PrintTable("#define %s_componentsct 0\n", _strCurrentClass);
+    PrintTable("\n");
+    PrintTable("\n");
   }
   | nonempty_component_declaration_list opt_comma {
-    fprintf(_fTables, "};\n");
-    fprintf(_fTables, "#define %s_componentsct ARRAYCOUNT(%s_components)\n", 
+    PrintTable("};\n");
+    PrintTable("#define %s_componentsct ARRAYCOUNT(%s_components)\n", 
       _strCurrentClass, _strCurrentClass);
-    fprintf(_fTables, "\n");
+    PrintTable("\n");
   }
   ;
 nonempty_component_declaration_list
@@ -836,11 +836,11 @@ empty_component_declaration_list
 
 component_declaration
   : component_id component_type component_identifier component_filename {
-  fprintf(_fTables, "#define %s ((0x%08x<<8)+%s)\n",
+  PrintTable("#define %s ((0x%08x<<8)+%s)\n",
       _strCurrentComponentIdentifier,
       _iCurrentClassID,
       _strCurrentComponentID);
-    fprintf(_fTables, " CEntityComponent(%s, %s, \"%s%s\" %s),\n",
+    PrintTable(" CEntityComponent(%s, %s, \"%s%s\" %s),\n",
       _strCurrentComponentType,
       _strCurrentComponentIdentifier,
       "EF","NM",
@@ -880,9 +880,9 @@ function_implementation
         yyerror("use 'void' as return type for constructors");
       }
     }
-    fprintf(_fDeclaration, " %s %s %s %s;\n", 
+    PrintDecl(" %s %s %s %s;\n", 
       $1.strString, $2.strString, strReturnType, strFunctionHeader);
-    fprintf(_fImplementation, "  %s %s::%s %s\n", 
+    PrintImpl("  %s %s::%s %s\n", 
       strReturnType, _strCurrentClass, strFunctionHeader, strFunctionBody);
   }
   ;
@@ -982,21 +982,21 @@ procedure_implementation
 
     sprintf(_strCurrentStateID, "STATE_%s_%s", 
       _strCurrentClass, RemoveLineDirective(strProcedureName));
-    fprintf(_fDeclaration, "#define  %s %s\n", _strCurrentStateID, strStateID);
+    PrintDecl("#define  %s %s\n", _strCurrentStateID, strStateID);
     AddHandlerFunction(strProcedureName, strStateID, $5.strString);
-    fprintf(_fImplementation, 
+    PrintImpl(
       "BOOL %s::%s(const CEntityEvent &__eeInput) {\n#undef STATE_CURRENT\n#define STATE_CURRENT %s\n", 
       _strCurrentClass, strProcedureName, _strCurrentStateID);
-    fprintf(_fImplementation, 
+    PrintImpl(
       "  ASSERTMSG(__eeInput.ee_slEvent==EVENTCODE_%s, \"%s::%s expects '%s' as input!\");",
       strInputEventType, _strCurrentClass, RemoveLineDirective(strProcedureName), 
       strInputEventType);
-    fprintf(_fImplementation, "  const %s &%s = (const %s &)__eeInput;",
+    PrintImpl("  const %s &%s = (const %s &)__eeInput;",
       strInputEventType, strInputEventName, strInputEventType);
 
   } '{' statements '}' opt_semicolon {
     char *strFunctionBody = $8.strString;
-    fprintf(_fImplementation, "%s ASSERT(FALSE); return TRUE;};", strFunctionBody);
+    PrintImpl("%s ASSERT(FALSE); return TRUE;};", strFunctionBody);
   }
   ;
 

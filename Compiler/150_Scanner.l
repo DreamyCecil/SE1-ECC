@@ -153,9 +153,9 @@ EXP_FLT (({DIGIT}+("."({DIGIT}*)?)?)("E"|"e")("+"|"-")?{DIGIT}+)
   BEGIN(INITIAL);
   _iLinesCt++;
   _strPreProc = (SType(_strPreProc)+yytext).strString;
-  fprintf(_fDeclaration, "%s", _strPreProc);
-  fprintf(_fTables, "%s", _strPreProc);
-  fprintf(_fImplementation, "%s", _strPreProc);
+  PrintDecl("%s", _strPreProc);
+  PrintTable("%s", _strPreProc);
+  PrintImpl("%s", _strPreProc);
 }
 <PREPROC>.*   {
   _strPreProc = (SType(_strPreProc)+yytext).strString;
