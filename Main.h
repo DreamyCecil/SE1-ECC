@@ -41,6 +41,9 @@ extern FILE *_fTables;
 extern char *_strFileNameBase;
 extern char *_strFileNameBaseIdentifier;
 
+// [Cecil] Generate headers with only new features
+extern bool _bCompatibilityMode;
+
 // Entity component flags
 #define CF_EDITOR (1UL << 1)
 

@@ -25,12 +25,16 @@ FILE *_fTables;
 char *_strFileNameBase;
 char *_strFileNameBaseIdentifier;
 
+// [Cecil] Generate extras for compatibility with vanilla
+bool _bCompatibilityMode = 0;
+
 extern "C" int yywrap(void) {
   return 1;
 };
 
+extern FILE *yyin;
+
 // Local variables
-static FILE *_fInput = NULL;
 static char *_strInputFileName = NULL;
 static int _ctErrors = 0;
 
@@ -236,15 +240,19 @@ int main(int argc, char *argv[]) {
   }
 
   // Parse extra arguments after the filename
-  if (argc > 2) {
-    if (strncmp(argv[2], "-line", 5) == 0) {
+  for (int iExtra = 2; iExtra < argc; iExtra++) {
+    // Remove line directives
+    if (strncmp(argv[iExtra], "-line", 5) == 0) {
       _bRemoveLineDirective = 1;
+
+    } else if (strncmp(argv[iExtra], "-compat", 7) == 0) {
+      _bCompatibilityMode = 1;
     }
   }
 
-  // Open input file
+  // Open input file and make lex use it
   const char *strFileName = argv[1];
-  _fInput = OpenFile(strFileName, "r");
+  yyin = OpenFile(strFileName, "r");
 
   char *strImplTmp = ChangeExt(strFileName, ".cpp_tmp");
   char *strImplOld = ChangeExt(strFileName, ".cpp");
@@ -288,10 +296,6 @@ int main(int argc, char *argv[]) {
   _strInputFileName = strFullInputName;
 
   ReplaceChar(_strInputFileName, '\\', '/');
-
-  // Make lex use the input file
-  extern FILE *yyin;
-  yyin = _fInput;
 
   // Parse input file and generate the output files
   yyparse();

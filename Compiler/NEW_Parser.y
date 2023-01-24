@@ -244,7 +244,9 @@ program
     PrintDecl("#define _%s_INCLUDED 1\n", _strFileNameBaseIdentifier);
 
     /* [Cecil] Include header with ECC extras */
-    PrintDecl("#include <EccExtras.h>\n");
+    if (!_bCompatibilityMode) {
+      PrintDecl("#include <EccExtras.h>\n");
+    }
 
   } opt_global_cppblock {
 
@@ -343,19 +345,22 @@ event_declaration
     PrintImpl("%s::%s() : CEntityEvent(EVENTCODE_%s) {\n",
       _strCurrentEvent, _strCurrentEvent, _strCurrentEvent);
 
-    /* [Cecil] Define an event constructor */
-    PrintTable("CEntityEvent *%s_New(void) { return new %s; };\n", _strCurrentEvent, _strCurrentEvent);
+    /* [Cecil] Not in compatibility mode */
+    if (!_bCompatibilityMode) {
+      /* Define an event constructor */
+      PrintTable("CEntityEvent *%s_New(void) { return new %s; };\n", _strCurrentEvent, _strCurrentEvent);
 
-    /* [Cecil] Define a library event with an extra class size field */
-    PrintTable(
-      "CDLLEntityEvent DLLEvent_%s = {\n"
-      "  0x%08x, &%s_New, sizeof(%s)\n"
-      "};\n",
-      _strCurrentEvent, iID, _strCurrentEvent, _strCurrentEvent);
+      /* Define a library event with an extra class size field */
+      PrintTable(
+        "CDLLEntityEvent DLLEvent_%s = {\n"
+        "  0x%08x, &%s_New, sizeof(%s)\n"
+        "};\n",
+        _strCurrentEvent, iID, _strCurrentEvent, _strCurrentEvent);
 
-    char strBuffer[256];
-    sprintf(strBuffer, "  &DLLEvent_%s,\n", _strCurrentEvent);
-    _strCurrentEventList = stradd(strBuffer, _strCurrentEventList);
+      char strBuffer[256];
+      sprintf(strBuffer, "  &DLLEvent_%s,\n", _strCurrentEvent);
+      _strCurrentEventList = stradd(strBuffer, _strCurrentEventList);
+    }
 
   } '{' event_members_list opt_comma '}' ';' {
     PrintImpl("};\n");
@@ -399,22 +404,25 @@ class_declaration
     _strCurrentDescription = $7.strString;
     _strCurrentThumbnail = $10.strString;
 
-    /* [Cecil] Define an entity event table to export */
-    if (strlen(_strCurrentEventList) > 0) {
-      PrintTable("CDLLEntityEvent *%s_events[] = {\n%s};\n", _strCurrentClass, _strCurrentEventList);
-      PrintTable("INDEX %s_eventsct = ARRAYCOUNT(%s_events);\n", _strCurrentClass, _strCurrentClass);
-    } else {
-      PrintTable("CDLLEntityEvent *%s_events[] = {NULL};\n", _strCurrentClass);
-      PrintTable("INDEX %s_eventsct = 0;\n", _strCurrentClass);
+    /* [Cecil] Not in compatibility mode */
+    if (!_bCompatibilityMode) {
+      /* Define an entity event table to export */
+      if (strlen(_strCurrentEventList) > 0) {
+        PrintTable("CDLLEntityEvent *%s_events[] = {\n%s};\n", _strCurrentClass, _strCurrentEventList);
+        PrintTable("const INDEX %s_eventsct = ARRAYCOUNT(%s_events);\n", _strCurrentClass, _strCurrentClass);
+      } else {
+        PrintTable("CDLLEntityEvent *%s_events[] = {NULL};\n", _strCurrentClass);
+        PrintTable("const INDEX %s_eventsct = 0;\n", _strCurrentClass);
+      }
+
+      /* Declare event list in the header since it's unavailable via CDLLEntityClass before 1.50 */
+      PrintDecl("extern \"C\" DECL_DLL CDLLEntityEvent *%s_events[];\n", _strCurrentClass);
+      PrintDecl("extern \"C\" DECL_DLL const INDEX %s_eventsct;\n\n", _strCurrentClass);
+
+      /* Declare list of entity property identifiers */
+      PrintDecl("extern \"C\" DECL_DLL const char *%s_propnames[];\n", _strCurrentClass);
+      PrintDecl("extern \"C\" DECL_DLL const INDEX %s_propnamesct;\n\n", _strCurrentClass);
     }
-
-    /* [Cecil] Declare event list in the header since it's unavailable via CDLLEntityClass before 1.50 */
-    PrintDecl("extern \"C\" DECL_DLL CDLLEntityEvent *%s_events[];\n", _strCurrentClass);
-    PrintDecl("extern \"C\" DECL_DLL INDEX %s_eventsct;\n\n", _strCurrentClass);
-
-    /* [Cecil] Declare list of entity property identifiers */
-    PrintDecl("extern \"C\" DECL_DLL const char *%s_propnames[];\n", _strCurrentClass);
-    PrintDecl("extern \"C\" DECL_DLL INDEX %s_propnamesct;\n\n", _strCurrentClass);
 
     PrintTable("#define ENTITYCLASS %s\n\n", _strCurrentClass);
     PrintDecl("extern \"C\" DECL_DLL CDLLEntityClass %s_DLLClass;\n",
@@ -502,10 +510,22 @@ class_declaration
       _strCurrentDescription, _strCurrentThumbnail, _iCurrentClassID);
     PrintTable("DECLARE_CTFILENAME(_fnm%s_tbn, %s);\n", _strCurrentClass, _strCurrentThumbnail);
 
-    /* [Cecil] Create an entity table entry */
-    PrintTable("\nENTITYTABLEENTRY(%s);\n", _strCurrentClass);
-
     PrintDecl("};\n");
+
+    if (!_bCompatibilityMode) {
+      /* [Cecil] Create an entity table entry */
+      PrintTable("\nENTITYTABLEENTRY(%s);\n", _strCurrentClass);
+
+    } else {
+      /* [Cecil] Define list of entity property identifiers */
+      if (strlen(_strCurrentPropertyList) > 0) {
+        PrintDecl("\nstatic const char *%s_propnames[] = {\n%s};\n", _strCurrentClass, _strCurrentPropertyList);
+        PrintDecl("#define %s_propnamesct ARRAYCOUNT(%s_propnames)\n\n", _strCurrentClass, _strCurrentClass);
+      } else {
+        PrintDecl("\nstatic const char *%s_propnames[] = {\"\"};\n", _strCurrentClass);
+        PrintDecl("#define %s_propnamesct 0\n\n", _strCurrentClass);
+      }
+    }
   }
   ;
 
@@ -600,8 +620,10 @@ property_declaration_list
     PrintTable("#define %s_propertiesct 0\n\n\n", _strCurrentClass);
 
     /* [Cecil] Define empty list of entity property identifiers */
-    PrintTable("const char *%s_propnames[] = {\"\"};\n", _strCurrentClass);
-    PrintTable("INDEX %s_propnamesct = 0;\n\n", _strCurrentClass);
+    if (!_bCompatibilityMode) {
+      PrintTable("const char *%s_propnames[] = {\"\"};\n", _strCurrentClass);
+      PrintTable("const INDEX %s_propnamesct = 0;\n\n", _strCurrentClass);
+    }
   }
   | nonempty_property_declaration_list opt_comma {
     DeclareFeatureProperties();
@@ -610,8 +632,10 @@ property_declaration_list
       _strCurrentClass, _strCurrentClass);
 
     /* [Cecil] Define list of entity property identifiers */
-    PrintTable("const char *%s_propnames[] = {\n%s};\n", _strCurrentClass, _strCurrentPropertyList);
-    PrintTable("INDEX %s_propnamesct = ARRAYCOUNT(%s_propnames);\n\n", _strCurrentClass, _strCurrentClass);
+    if (!_bCompatibilityMode) {
+      PrintTable("const char *%s_propnames[] = {\n%s};\n", _strCurrentClass, _strCurrentPropertyList);
+      PrintTable("const INDEX %s_propnamesct = ARRAYCOUNT(%s_propnames);\n\n", _strCurrentClass, _strCurrentClass);
+    }
   }
   ;
 nonempty_property_declaration_list
