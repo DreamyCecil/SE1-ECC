@@ -25,7 +25,7 @@ FILE *_fTables;
 char *_strFileNameBase;
 char *_strFileNameBaseIdentifier;
 
-// [Cecil] Generate extras for compatibility with vanilla
+// [Cecil] Generate sources compatibile with vanilla
 bool _bCompatibilityMode = 0;
 
 extern "C" int yywrap(void) {
@@ -35,8 +35,8 @@ extern "C" int yywrap(void) {
 extern FILE *yyin;
 
 // Local variables
-static char *_strInputFileName = NULL;
-static int _ctErrors = 0;
+static char _strInputFileName[MAXPATHLEN] = {0};
+static bool _bError = false;
 
 static bool _bRemoveLineDirective = 0;
 
@@ -124,7 +124,7 @@ void PrintTable(const char *strFormat, ...) {
 // Report error during parsing
 void yyerror(char *s) {
   fprintf(stderr, "%s(%d): Error: %s\n", _strInputFileName, _iLinesCt, s);
-  _ctErrors++;
+  _bError = true;
 };
 
 // Change extension of the filename
@@ -291,9 +291,7 @@ int main(int argc, char *argv[]) {
   PrintHeader(_fTables);
 
   // Remember input filename
-  char strFullInputName[MAXPATHLEN];
-  _fullpath(strFullInputName, strFileName, MAXPATHLEN);
-  _strInputFileName = strFullInputName;
+  _fullpath(_strInputFileName, strFileName, MAXPATHLEN);
 
   ReplaceChar(_strInputFileName, '\\', '/');
 
@@ -306,7 +304,7 @@ int main(int argc, char *argv[]) {
   fclose(_fTables);
 
   // If there were no errors
-  if (_ctErrors == 0) {
+  if (!_bError) {
     // Update files that have changed
     ReplaceFile(strImplOld, strImplTmp);
     ReplaceIfChanged(strDeclOld, strDeclTmp);
