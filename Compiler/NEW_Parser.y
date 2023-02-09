@@ -530,8 +530,20 @@ class_declaration
   ;
 
 class_optexport
-  : k_class { $$ = $1; _bClassIsExported = 0; }
-  | k_class k_export { $$ = $1+" DECL_DLL "; _bClassIsExported = 1; }
+  : k_class {
+    // [Cecil] Force class export
+    if (_bForceExport) {
+      $$ = $1 + " DECL_DLL ";
+    } else {
+      $$ = $1;
+    }
+
+    _bClassIsExported = _bForceExport;
+  }
+  | k_class k_export {
+    $$ = $1 + " DECL_DLL ";
+    _bClassIsExported = 1;
+  }
   ;
 
 opt_features

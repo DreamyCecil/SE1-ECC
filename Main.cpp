@@ -26,7 +26,10 @@ char *_strFileNameBase;
 char *_strFileNameBaseIdentifier;
 
 // [Cecil] Generate sources compatibile with vanilla
-bool _bCompatibilityMode = 0;
+bool _bCompatibilityMode = false;
+
+// [Cecil] Export class from the library without specifying it in code
+bool _bForceExport = false;
 
 extern "C" int yywrap(void) {
   return 1;
@@ -38,7 +41,7 @@ extern FILE *yyin;
 static char _strInputFileName[MAXPATHLEN] = {0};
 static bool _bError = false;
 
-static bool _bRemoveLineDirective = 0;
+static bool _bRemoveLineDirective = false;
 
 // String concatenation
 SType SType::operator+(const SType &other) const {
@@ -243,10 +246,13 @@ int main(int argc, char *argv[]) {
   for (int iExtra = 2; iExtra < argc; iExtra++) {
     // Remove line directives
     if (strncmp(argv[iExtra], "-line", 5) == 0) {
-      _bRemoveLineDirective = 1;
+      _bRemoveLineDirective = true;
 
     } else if (strncmp(argv[iExtra], "-compat", 7) == 0) {
-      _bCompatibilityMode = 1;
+      _bCompatibilityMode = true;
+
+    } else if (strncmp(argv[iExtra], "-export", 7) == 0) {
+      _bForceExport = true;
     }
   }
 
