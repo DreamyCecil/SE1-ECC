@@ -238,7 +238,10 @@ static void ReplaceIfChanged(const char *strOldFile, const char *strNewFile) {
 int main(int argc, char *argv[]) {
   // Print usage if not enough arguments
   if (argc < 2) {
-    printf("Usage: Ecc <es_file_name>\n       -line\n");
+    printf("Usage: Ecc <es_file_name>\n"
+           "\t-line : Compile without #line preprocessor directives pointing to places in the .es file\n"
+           "\t-compat : Make compiled code compatible with vanilla Serious Sam SDK\n"
+           "\t-export : Export entity class regardless of the 'export' keyword after 'class'\n");
     return EXIT_FAILURE;
   }
 
