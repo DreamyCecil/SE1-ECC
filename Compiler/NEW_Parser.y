@@ -111,20 +111,20 @@ void CreateInternalHandlerFunction(char *strFunctionName, char *strID)
 void DeclareFeatureProperties(void)
 {
   if (_bFeature_CanBePredictable) {
-    PrintTable(" CEntityProperty(CEntityProperty::EPT_ENTITYPTR, NULL, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, %s, %s),\n",
-      _iCurrentClassID,
-      "255",
-      _strCurrentClass,
-      "m_penPrediction",
-      "\"\"",
-      "0",
-      "0",
-      "0");
+    /* [Cecil] Print entity property entry separately */
+    char strPropClass[1024];
+    sprintf(strPropClass, "CEntityProperty(CEntityProperty::EPT_ENTITYPTR, NULL, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, %s, %s)",
+      _iCurrentClassID, "255", _strCurrentClass, "m_penPrediction", "\"\"", "0", "0", "0");
+
+    PrintTable(" %s,\n", strPropClass);
     PrintDecl("  CEntityPointer m_penPrediction;\n");
     PrintImpl("  m_penPrediction = NULL;\n");
 
-    /* [Cecil] Add property identifier into the list */
-    _strCurrentPropertyList = stradd(_strCurrentPropertyList, "  \"m_penPrediction\",\n");
+    /* [Cecil] Add property reference into the list */
+    char strPropRef[1024];
+    sprintf(strPropRef, "  EntityPropertyRef(\"m_penPrediction\", "
+      "CEntityProperty(CEntityProperty::EPT_ENTITYPTR, NULL, (0x%X<<8)+255, 0, \"\", 0, 0, 0)),\n", _iCurrentClassID);
+    _strCurrentPropertyList = stradd(_strCurrentPropertyList, strPropRef);
   }
 }
 
@@ -419,9 +419,9 @@ class_declaration
       PrintDecl("extern \"C\" DECL_DLL CDLLEntityEvent *%s_events[];\n", _strCurrentClass);
       PrintDecl("extern \"C\" DECL_DLL const INDEX %s_eventsct;\n\n", _strCurrentClass);
 
-      /* Declare list of entity property identifiers */
-      PrintDecl("extern \"C\" DECL_DLL const char *%s_propnames[];\n", _strCurrentClass);
-      PrintDecl("extern \"C\" DECL_DLL const INDEX %s_propnamesct;\n\n", _strCurrentClass);
+      /* Declare list of entity property references */
+      PrintDecl("extern \"C\" DECL_DLL EntityPropertyRef %s_proprefs[];\n", _strCurrentClass);
+      PrintDecl("extern \"C\" DECL_DLL const INDEX %s_proprefsct;\n\n", _strCurrentClass);
     }
 
     PrintTable("#define ENTITYCLASS %s\n\n", _strCurrentClass);
@@ -515,16 +515,20 @@ class_declaration
     if (!_bCompatibilityMode) {
       /* [Cecil] Create an entity table entry */
       PrintTable("\nENTITYTABLEENTRY(%s);\n", _strCurrentClass);
+    }
 
-    } else {
-      /* [Cecil] Define list of entity property identifiers */
+    if (IsPropListOpen()) {
+      /* [Cecil] Define list of entity property references */
       if (strlen(_strCurrentPropertyList) > 0) {
-        PrintDecl("\nstatic const char *%s_propnames[] = {\n%s};\n", _strCurrentClass, _strCurrentPropertyList);
-        PrintDecl("#define %s_propnamesct ARRAYCOUNT(%s_propnames)\n\n", _strCurrentClass, _strCurrentClass);
+        PrintProps("\nENTITYPROPERTYREF_DECL EntityPropertyRef %s_proprefs[] = {\n%s};\n", _strCurrentClass, _strCurrentPropertyList);
+        PrintProps("ENTITYPROPERTYREF_DECL const INDEX %s_proprefsct = ARRAYCOUNT(%s_proprefs);\n", _strCurrentClass, _strCurrentClass);
       } else {
-        PrintDecl("\nstatic const char *%s_propnames[] = {\"\"};\n", _strCurrentClass);
-        PrintDecl("#define %s_propnamesct 0\n\n", _strCurrentClass);
+        PrintProps("\nENTITYPROPERTYREF_DECL EntityPropertyRef %s_proprefs[] = { EntityPropertyRef() };\n", _strCurrentClass);
+        PrintProps("ENTITYPROPERTYREF_DECL const INDEX %s_proprefsct = 0;\n", _strCurrentClass);
       }
+
+      /* [Cecil] Create an entry for these property references */
+      PrintProps("ENTITYPROPERTYREF_ENTRY(%s, %s_proprefs, %s_proprefsct);\n", _strCurrentClass, _strCurrentClass, _strCurrentClass);
     }
   }
   ;
@@ -631,10 +635,10 @@ property_declaration_list
     PrintTable("  CEntityProperty()\n};\n");
     PrintTable("#define %s_propertiesct 0\n\n\n", _strCurrentClass);
 
-    /* [Cecil] Define empty list of entity property identifiers */
+    /* [Cecil] Define empty list of entity property references */
     if (!_bCompatibilityMode) {
-      PrintTable("const char *%s_propnames[] = {\"\"};\n", _strCurrentClass);
-      PrintTable("const INDEX %s_propnamesct = 0;\n\n", _strCurrentClass);
+      PrintTable("EntityPropertyRef %s_proprefs[] = { EntityPropertyRef() };\n", _strCurrentClass);
+      PrintTable("const INDEX %s_proprefsct = 0;\n\n", _strCurrentClass);
     }
   }
   | nonempty_property_declaration_list opt_comma {
@@ -643,10 +647,10 @@ property_declaration_list
     PrintTable("#define %s_propertiesct ARRAYCOUNT(%s_properties)\n\n", 
       _strCurrentClass, _strCurrentClass);
 
-    /* [Cecil] Define list of entity property identifiers */
+    /* [Cecil] Define list of entity property references */
     if (!_bCompatibilityMode) {
-      PrintTable("const char *%s_propnames[] = {\n%s};\n", _strCurrentClass, _strCurrentPropertyList);
-      PrintTable("const INDEX %s_propnamesct = ARRAYCOUNT(%s_propnames);\n\n", _strCurrentClass, _strCurrentClass);
+      PrintTable("EntityPropertyRef %s_proprefs[] = {\n%s};\n", _strCurrentClass, _strCurrentPropertyList);
+      PrintTable("const INDEX %s_proprefsct = ARRAYCOUNT(%s_proprefs);\n\n", _strCurrentClass, _strCurrentClass);
     }
   }
   ;
@@ -682,10 +686,15 @@ property_declaration
       _strCurrentPropertyDataType,
       _strCurrentPropertyIdentifier);
 
-    /* [Cecil] Add property identifier into the list */
-    char strPropInList[1024];
-    sprintf(strPropInList, "  \"%s\",\n", _strCurrentPropertyIdentifier);
-    _strCurrentPropertyList = stradd(_strCurrentPropertyList, strPropInList);
+    /* [Cecil] Add property reference into the list */
+    char strPropRef[1024];
+    sprintf(strPropRef, "  EntityPropertyRef(\"%s\", CEntityProperty(%s, NULL, (0x%X<<8)+%s, 0, %s, %s, %s, %s)),\n",
+      _strCurrentPropertyIdentifier, _strCurrentPropertyPropertyType,
+      _iCurrentClassID, _strCurrentPropertyID,
+      _strCurrentPropertyName, _strCurrentPropertyShortcut,
+      _strCurrentPropertyColor, _strCurrentPropertyFlags);
+
+    _strCurrentPropertyList = stradd(_strCurrentPropertyList, strPropRef);
 
     if (strlen(_strCurrentPropertyDefaultCode)>0) {
       PrintImpl("  %s\n", _strCurrentPropertyDefaultCode);
