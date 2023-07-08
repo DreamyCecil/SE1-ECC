@@ -198,7 +198,7 @@ void DeclareFeatureProperties(void)
 %token k_FLOAT
 %token k_INDEX
 %token k_U64
-%token k_TIME
+%token k_DOUBLE
 %token k_RANGE
 %token k_CEntityPointer
 %token k_CModelObject
@@ -649,10 +649,10 @@ property_type
     _strCurrentPropertyEnumType = "NULL"; 
     _strCurrentPropertyDataType = "U64";
   }
-  | k_TIME { /* [Cecil] Time value */
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_TIME"; 
+  | k_DOUBLE { /* [Cecil] 64-bit float value */
+    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_DOUBLE"; 
     _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "TIME";
+    _strCurrentPropertyDataType = "DOUBLE";
   }
   | k_RANGE {
     _strCurrentPropertyPropertyType = "CEntityProperty::EPT_RANGE"; 
@@ -1046,7 +1046,7 @@ expression
   ;
 type_keyword
   : k_CTString|k_CTStringTrans|k_CTFileName|k_CTFileNameNoDep
-  | k_BOOL|k_COLOR|k_FLOAT|k_INDEX|k_RANGE|k_U64|k_TIME
+  | k_BOOL|k_COLOR|k_FLOAT|k_INDEX|k_RANGE|k_U64|k_DOUBLE
   | k_CEntityPointer|k_CModelObject|k_CModelInstance|k_CAnimObject|k_CSoundObject
   | k_CPlacement3D | k_FLOATaabbox3D|k_FLOATmatrix3D| k_FLOATquat3D|k_ANGLE|k_ANIMATION|k_ILLUMINATIONTYPE
   | k_ANGLE3D|k_FLOAT3D|k_FLOATplane3D

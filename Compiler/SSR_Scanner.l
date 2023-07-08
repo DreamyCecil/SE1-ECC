@@ -90,7 +90,7 @@ EXP_FLT (({DIGIT}+("."({DIGIT}*)?)?)("E"|"e")("+"|"-")?{DIGIT}+)
 "FLOAT"             {RETURN(k_FLOAT);}
 "INDEX"             {RETURN(k_INDEX);}
 "U64"               {RETURN(k_U64);} /* [Cecil] 64-bit integer */
-"TIME"              {RETURN(k_TIME);} /* [Cecil] Time value */
+"DOUBLE"            {RETURN(k_DOUBLE);} /* [Cecil] 64-bit float value */
 "RANGE"             {RETURN(k_RANGE);}
 "CEntityPointer"    {RETURN(k_CEntityPointer);}
 "CModelObject"      {RETURN(k_CModelObject);}
