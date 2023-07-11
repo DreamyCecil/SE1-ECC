@@ -17,11 +17,13 @@ int iLastLine = -1;
   return symbolname;
 
 char *_strCppBlock;
+char *_strPreProc;
 
 %}
 
 %x COMMENT
 %x CPPBLOCK
+%x PREPROC
 
 DIGIT		[0-9]
 HEXDIGIT [0-9A-Fa-f]
@@ -138,6 +140,21 @@ EXP_FLT (({DIGIT}+("."({DIGIT}*)?)?)("E"|"e")("+"|"-")?{DIGIT}+)
  }
 <CPPBLOCK>.*   {
   _strCppBlock = (SType(_strCppBlock)+yytext).strString;
+}
+
+ /* [Cecil] Parse preprocessor directives until a line break */
+"#" {
+  _strPreProc = strdup("\n#");
+  BEGIN(PREPROC);
+}
+<PREPROC>\n {
+  BEGIN(INITIAL);
+  _iLinesCt++;
+  yylval = SType(_strPreProc)+yytext;
+  return preproc;
+}
+<PREPROC>.*   {
+  _strPreProc = (SType(_strPreProc)+yytext).strString;
 }
 
  /* eat up comments */

@@ -140,6 +140,9 @@ void DeclareFeatureProperties(void)
 /* specially bracketed cpp blocks */
 %token cppblock
 
+/* [Cecil] Preprocessor directive */
+%token preproc
+
 /* standard cpp-keywords */
 %token k_while
 %token k_for
@@ -265,6 +268,9 @@ uses_statement
   : k_uses c_string ';' {
     char *strUsedFileName = strdup($2.strString);
     strUsedFileName[strlen(strUsedFileName)-1] = 0;
+
+    /* [Cecil] Print line directive before the used header */
+    PrintDecl(LineDirective(true));
     PrintDecl("#include <%s.h>\n", strUsedFileName+1);
   }
   ;
@@ -320,7 +326,7 @@ event_declaration
       "CEntityEvent *peeCopy = new %s(*this); "
       "return peeCopy;}\n",
       _strCurrentEvent, _strCurrentEvent);
-    PrintImpl("%s::%s() : CEntityEvent(EVENTCODE_%s) {;\n",
+    PrintImpl("%s::%s() : CEntityEvent(EVENTCODE_%s) {\n",
       _strCurrentEvent, _strCurrentEvent, _strCurrentEvent);
   } '{' event_members_list opt_comma '}' ';' {
     PrintImpl("};\n");
@@ -455,8 +461,20 @@ class_declaration
   ;
 
 class_optexport
-  : k_class { $$ = $1; _bClassIsExported = 0; }
-  | k_class k_export { $$ = $1+" DECL_DLL "; _bClassIsExported = 1; }
+  : k_class {
+    // [Cecil] Force class export
+    if (_bForceExport) {
+      $$ = $1 + " DECL_DLL ";
+    } else {
+      $$ = $1;
+    }
+
+    _bClassIsExported = _bForceExport;
+  }
+  | k_class k_export {
+    $$ = $1 + " DECL_DLL ";
+    _bClassIsExported = 1;
+  }
   ;
 
 opt_features
@@ -542,16 +560,13 @@ property_declaration_list
   : empty_property_declaration_list {
     DeclareFeatureProperties(); // this won't work, but at least it will generate an error!!!!
     PrintTable("  CEntityProperty()\n};\n");
-    PrintTable("#define %s_propertiesct 0\n", _strCurrentClass);
-    PrintTable("\n");
-    PrintTable("\n");
+    PrintTable("#define %s_propertiesct 0\n\n\n", _strCurrentClass);
   }
   | nonempty_property_declaration_list opt_comma {
     DeclareFeatureProperties();
     PrintTable("};\n");
-    PrintTable("#define %s_propertiesct ARRAYCOUNT(%s_properties)\n", 
+    PrintTable("#define %s_propertiesct ARRAYCOUNT(%s_properties)\n\n", 
       _strCurrentClass, _strCurrentClass);
-    PrintTable("\n");
   }
   ;
 nonempty_property_declaration_list
@@ -575,10 +590,10 @@ property_declaration
       _strCurrentPropertyShortcut,
       _strCurrentPropertyColor,
       _strCurrentPropertyFlags);
+
     PrintDecl("  %s %s;\n",
       _strCurrentPropertyDataType,
-      _strCurrentPropertyIdentifier
-      );
+      _strCurrentPropertyIdentifier);
 
     if (strlen(_strCurrentPropertyDefaultCode)>0) {
       PrintImpl("  %s\n", _strCurrentPropertyDefaultCode);
@@ -854,7 +869,13 @@ function_list
   ;
 
 function_implementation
-  : opt_export opt_virtual return_type opt_tilde identifier '(' parameters_list ')' opt_const
+  : preproc {
+    /* [Cecil] Preprocessor directives inbetween functions */
+    char *strPreproc = $1.strString;
+    PrintDecl("%s", strPreproc);
+    PrintImpl("%s", strPreproc);
+  }
+  | opt_export opt_virtual return_type opt_tilde identifier '(' parameters_list ')' opt_const
   '{' statements '}' opt_semicolon {
     char *strReturnType = $3.strString;
     char *strFunctionHeader = ($4+$5+$6+$7+$8+$9).strString;
@@ -1057,6 +1078,7 @@ statement
   | k_case case_constant_expression ':' {$$=$1+" "+$2+$3+" ";}
   | '{' statements '}' {$$=$1+$2+$3;}
   | expression '{' statements '}' {$$=$1+$2+$3+$4;}
+  | preproc { $$ = $1; } /* [Cecil] Inline preprocessor directives */
   | statement_while
   | statement_dowhile
   | statement_for
