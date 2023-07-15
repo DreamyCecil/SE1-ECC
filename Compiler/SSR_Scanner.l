@@ -91,6 +91,7 @@ EXP_FLT (({DIGIT}+("."({DIGIT}*)?)?)("E"|"e")("+"|"-")?{DIGIT}+)
 "COLOR"             {RETURN(k_COLOR);}
 "FLOAT"             {RETURN(k_FLOAT);}
 "INDEX"             {RETURN(k_INDEX);}
+"TIME"              {RETURN(k_TIME);} /* [Cecil] Expanded timer type */
 "U64"               {RETURN(k_U64);} /* [Cecil] 64-bit integer */
 "DOUBLE"            {RETURN(k_DOUBLE);} /* [Cecil] 64-bit float value */
 "RANGE"             {RETURN(k_RANGE);}

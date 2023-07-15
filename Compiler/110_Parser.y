@@ -199,6 +199,7 @@ void DeclareFeatureProperties(void)
 %token k_COLOR
 %token k_FLOAT
 %token k_INDEX
+%token k_TIME
 %token k_RANGE
 %token k_CEntityPointer
 %token k_CModelObject
@@ -655,6 +656,11 @@ property_type
     _strCurrentPropertyEnumType = "NULL"; 
     _strCurrentPropertyDataType = "INDEX";
   }
+  | k_TIME { /* [Cecil] Expanded timer type (FLOAT) */
+    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_FLOAT"; 
+    _strCurrentPropertyEnumType = "NULL"; 
+    _strCurrentPropertyDataType = "FLOAT";
+  }
   | k_RANGE {
     _strCurrentPropertyPropertyType = "CEntityProperty::EPT_RANGE"; 
     _strCurrentPropertyEnumType = "NULL"; 
@@ -1053,7 +1059,7 @@ expression
   ;
 type_keyword
   : k_CTString|k_CTStringTrans|k_CTFileName|k_CTFileNameNoDep
-  | k_BOOL|k_COLOR|k_FLOAT|k_INDEX|k_RANGE
+  | k_BOOL|k_COLOR|k_FLOAT|k_INDEX|k_TIME|k_RANGE
   | k_CEntityPointer|k_CModelObject|k_CModelInstance|k_CAnimObject|k_CSoundObject
   | k_CPlacement3D | k_FLOATaabbox3D|k_FLOATmatrix3D| k_FLOATquat3D|k_ANGLE|k_ANIMATION|k_ILLUMINATIONTYPE
   | k_ANGLE3D|k_FLOAT3D|k_FLOATplane3D
