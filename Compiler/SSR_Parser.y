@@ -111,7 +111,7 @@ void DeclareFeatureProperties(void)
       "m_penPrediction",
       "\"\"",
       "0",
-      "m_penPrediction", /* [Cecil] Property name in the code */
+      "m_penPrediction", /* [Cecil] Property name in code */
       "0",
       "0");
     PrintDecl("  %s %s;\n",
@@ -592,7 +592,7 @@ property_declaration
       _strCurrentPropertyIdentifier,
       _strCurrentPropertyName,
       _strCurrentPropertyShortcut,
-      _strCurrentPropertyIdentifier, /* [Cecil] Property name in the code */
+      _strCurrentPropertyIdentifier, /* [Cecil] Property name in code */
       _strCurrentPropertyColor,
       _strCurrentPropertyFlags);
 

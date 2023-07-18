@@ -113,8 +113,8 @@ void DeclareFeatureProperties(void)
   if (_bFeature_CanBePredictable) {
     /* [Cecil] Print entity property entry separately */
     char strPropClass[1024];
-    sprintf(strPropClass, "CEntityProperty(CEntityProperty::EPT_ENTITYPTR, NULL, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, %s, %s)",
-      _iCurrentClassID, "255", _strCurrentClass, "m_penPrediction", "\"\"", "0", "0", "0");
+    sprintf(strPropClass, "ENGINE_SPECIFIC_PROP_DEF(CEntityProperty::EPT_ENTITYPTR, NULL, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, \"%s\", %s, %s)",
+      _iCurrentClassID, "255", _strCurrentClass, "m_penPrediction", "\"\"", "0", "m_penPrediction", "0", "0");
 
     PrintTable(" %s,\n", strPropClass);
     PrintDecl("  CEntityPointer m_penPrediction;\n");
@@ -123,7 +123,7 @@ void DeclareFeatureProperties(void)
     /* [Cecil] Add property reference into the list */
     char strPropRef[1024];
     sprintf(strPropRef, "  EntityPropertyRef(\"m_penPrediction\", "
-      "CEntityProperty(CEntityProperty::EPT_ENTITYPTR, NULL, (0x%X<<8)+255, 0, \"\", 0, 0, 0)),\n", _iCurrentClassID);
+      "ENGINE_SPECIFIC_PROP_DEF(CEntityProperty::EPT_ENTITYPTR, NULL, (0x%X<<8)+255, 0, \"\", 0, \"m_penPrediction\", 0, 0)),\n", _iCurrentClassID);
     _strCurrentPropertyList = stradd(_strCurrentPropertyList, strPropRef);
   }
 }
@@ -671,7 +671,7 @@ property_declaration
       yyerror((SType("property ID 255 may conflict with 'm_penPrediction', property: ")+$3).strString);
     }
 
-    PrintTable(" CEntityProperty(%s, %s, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, %s, %s),\n",
+    PrintTable(" ENGINE_SPECIFIC_PROP_DEF(%s, %s, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, \"%s\", %s, %s),\n",
       _strCurrentPropertyPropertyType,
       _strCurrentPropertyEnumType,
       _iCurrentClassID,
@@ -680,6 +680,7 @@ property_declaration
       _strCurrentPropertyIdentifier,
       _strCurrentPropertyName,
       _strCurrentPropertyShortcut,
+      _strCurrentPropertyIdentifier, /* [Cecil] Property name in code */
       _strCurrentPropertyColor,
       _strCurrentPropertyFlags);
 
@@ -689,10 +690,10 @@ property_declaration
 
     /* [Cecil] Add property reference into the list */
     char strPropRef[1024];
-    sprintf(strPropRef, "  EntityPropertyRef(\"%s\", CEntityProperty(%s, NULL, (0x%X<<8)+%s, 0, %s, %s, %s, %s)),\n",
+    sprintf(strPropRef, "  EntityPropertyRef(\"%s\", ENGINE_SPECIFIC_PROP_DEF(%s, NULL, (0x%X<<8)+%s, 0, %s, %s, \"%s\", %s, %s)),\n",
       _strCurrentPropertyIdentifier, _strCurrentPropertyPropertyType,
       _iCurrentClassID, _strCurrentPropertyID,
-      _strCurrentPropertyName, _strCurrentPropertyShortcut,
+      _strCurrentPropertyName, _strCurrentPropertyShortcut, _strCurrentPropertyIdentifier,
       _strCurrentPropertyColor, _strCurrentPropertyFlags);
 
     _strCurrentPropertyList = stradd(_strCurrentPropertyList, strPropRef);
