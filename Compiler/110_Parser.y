@@ -656,10 +656,10 @@ property_type
     _strCurrentPropertyEnumType = "NULL"; 
     _strCurrentPropertyDataType = "INDEX";
   }
-  | k_TIME { /* [Cecil] Expanded timer type (FLOAT) */
+  | k_TIME { /* [Cecil] Expanded timer type */
     _strCurrentPropertyPropertyType = "CEntityProperty::EPT_FLOAT"; 
     _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "FLOAT";
+    _strCurrentPropertyDataType = "TIME";
   }
   | k_RANGE {
     _strCurrentPropertyPropertyType = "CEntityProperty::EPT_RANGE"; 

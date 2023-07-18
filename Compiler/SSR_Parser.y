@@ -660,10 +660,10 @@ property_type
     _strCurrentPropertyEnumType = "NULL"; 
     _strCurrentPropertyDataType = "INDEX";
   }
-  | k_TIME { /* [Cecil] Expanded timer type (DOUBLE) */
+  | k_TIME { /* [Cecil] Expanded timer type */
     _strCurrentPropertyPropertyType = "CEntityProperty::EPT_DOUBLE"; 
     _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "DOUBLE";
+    _strCurrentPropertyDataType = "TIME";
   }
   | k_U64 { /* [Cecil] 64-bit integer */
     _strCurrentPropertyPropertyType = "CEntityProperty::EPT_U64"; 
