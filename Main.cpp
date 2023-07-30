@@ -405,6 +405,8 @@ int main(int argc, char *argv[]) {
       "// Example: You can create a method that fills a CPropertyRefTable structure from an argument with all of the property tables\n"
       "// by defining your own ENTITYPROPERTYREF_ENTRY macro as such:\n"
       "//   #define ENTITYPROPERTYREF_ENTRY(Class, Refs, RefsCount) map.FillPropertyReferences(#Class, Refs, RefsCount)\n\n\n"
+
+      "#include <EccExtras/EntityProperties.h>\n\n"
     );
 
     PrintProps(
