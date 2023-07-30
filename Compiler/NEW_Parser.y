@@ -425,6 +425,9 @@ class_declaration
       PrintDecl("extern \"C\" DECL_DLL const INDEX %s_proprefsct;\n\n", _strCurrentClass);
     }
 
+    /* [Cecil] Define class ID */
+    PrintDecl("#define %s_ClassID %d\n", _strCurrentClass, _iCurrentClassID);
+
     PrintTable("#define ENTITYCLASS %s\n\n", _strCurrentClass);
     PrintDecl("extern \"C\" DECL_DLL CDLLEntityClass %s_DLLClass;\n",
       _strCurrentClass);
