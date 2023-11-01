@@ -1,6 +1,8 @@
 %{
 #include "StdH.h"
 
+#include <set>
+
 static char *_strCurrentClass;
 static int _iCurrentClassID;
 static char *_strCurrentBase;
@@ -19,6 +21,9 @@ static char *_strCurrentPropertyShortcut;
 static char *_strCurrentPropertyColor;
 static char *_strCurrentPropertyFlags;
 static char *_strCurrentPropertyDefaultCode;
+
+// [Cecil] Set of unique property/component IDs
+static std::set<int> _aUniqueIDs;
 
 // [Cecil] Entity event list
 static char *_strCurrentEventList;
@@ -439,10 +444,17 @@ class_declaration
     PrintImpl("void %s::SetDefaultProperties(void) {\n", _strCurrentClass);
     PrintTable("CEntityProperty %s_properties[] = {\n", _strCurrentClass);
 
+    /* [Cecil] Clear unique IDs for properties */
+    _aUniqueIDs.clear();
+
   } k_properties ':' property_declaration_list {
     PrintImpl("  %s::SetDefaultProperties();\n}\n", _strCurrentBase);
 
     PrintTable("CEntityComponent %s_components[] = {\n", _strCurrentClass);
+
+    /* [Cecil] Clear unique IDs for components */
+    _aUniqueIDs.clear();
+
   } opt_internal_properties {
   } k_components ':' component_declaration_list {
     _bTrackLineInformation = 1;
@@ -671,8 +683,16 @@ property_declaration
     /* [Cecil] Disallow using 255 as a property ID */
     int iPropertyID = atoi(_strCurrentPropertyID);
     if (iPropertyID == 255) {
-      yyerror((SType("property ID 255 may conflict with 'm_penPrediction', property: ")+$3).strString);
+      yyerror((SType("property ID 255 may conflict with 'm_penPrediction', property: ") + $3).strString);
     }
+
+    /* [Cecil] Disallow IDs that have been previously used */
+    if (_aUniqueIDs.find(iPropertyID) != _aUniqueIDs.end()) {
+      yyerror((SType("encountered repeating property ID ") + _strCurrentPropertyID + ", property: " + $3).strString);
+    }
+
+    /* [Cecil] Add another ID */
+    _aUniqueIDs.insert(iPropertyID);
 
     PrintTable(" ENGINE_SPECIFIC_PROP_DEF(%s, %s, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, \"%s\", %s, %s),\n",
       _strCurrentPropertyPropertyType,
@@ -949,7 +969,17 @@ empty_component_declaration_list
 
 component_declaration
   : component_id component_type component_identifier component_filename {
-  PrintTable("#define %s ((0x%08x<<8)+%s)\n",
+    int iComponentID = atoi(_strCurrentComponentID);
+
+    /* [Cecil] Disallow IDs that have been previously used */
+    if (_aUniqueIDs.find(iComponentID) != _aUniqueIDs.end()) {
+      yyerror((SType("encountered repeating component ID ") + _strCurrentComponentID + ", component: " + $3).strString);
+    }
+
+    /* [Cecil] Add another ID */
+    _aUniqueIDs.insert(iComponentID);
+
+    PrintTable("#define %s ((0x%08x<<8)+%s)\n",
       _strCurrentComponentIdentifier,
       _iCurrentClassID,
       _strCurrentComponentID);
