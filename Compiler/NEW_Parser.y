@@ -679,20 +679,29 @@ empty_property_declaration_list
   ;
 
 property_declaration
-  : property_id property_type property_identifier property_wed_name_opt property_default_opt property_flags_opt {
+  : property_preproc_opt property_id property_type property_identifier property_wed_name_opt property_default_opt property_flags_opt {
     /* [Cecil] Disallow using 255 as a property ID */
     int iPropertyID = atoi(_strCurrentPropertyID);
     if (iPropertyID == 255) {
-      yyerror((SType("property ID 255 may conflict with 'm_penPrediction', property: ") + $3).strString);
+      yyerror((SType("property ID 255 may conflict with 'm_penPrediction', property: ") + $4).strString);
     }
 
     /* [Cecil] Disallow IDs that have been previously used */
     if (_aUniqueIDs.find(iPropertyID) != _aUniqueIDs.end()) {
-      yyerror((SType("encountered repeating property ID ") + _strCurrentPropertyID + ", property: " + $3).strString);
+      yyerror((SType("encountered repeating property ID ") + _strCurrentPropertyID + ", property: " + $4).strString);
     }
 
     /* [Cecil] Add another ID */
     _aUniqueIDs.insert(iPropertyID);
+
+    /* [Cecil] Open preprocessor check */
+    const char *strPreproc = $1.strString;
+    bool bPreproc = (strcmp(strPreproc, "") != 0);
+
+    if (bPreproc) {
+      PrintTable("#if %s", strPreproc);
+      PrintDecl("#if %s", strPreproc);
+    }
 
     PrintTable(" ENGINE_SPECIFIC_PROP_DEF(%s, %s, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, \"%s\", %s, %s),\n",
       _strCurrentPropertyPropertyType,
@@ -711,6 +720,12 @@ property_declaration
       _strCurrentPropertyDataType,
       _strCurrentPropertyIdentifier);
 
+    /* [Cecil] Close preprocessor check */
+    if (bPreproc) {
+      PrintTable("#endif // %s", strPreproc);
+      PrintDecl("#endif // %s", strPreproc);
+    }
+
     /* [Cecil] Add property reference into the list */
     char strPropRef[1024];
     sprintf(strPropRef, "  EntityPropertyRef(\"%s\", ENGINE_SPECIFIC_PROP_DEF(%s, NULL, (0x%X<<8)+%s, 0, %s, %s, \"%s\", %s, %s)),\n",
@@ -719,11 +734,48 @@ property_declaration
       _strCurrentPropertyName, _strCurrentPropertyShortcut, _strCurrentPropertyIdentifier,
       _strCurrentPropertyColor, _strCurrentPropertyFlags);
 
+    /* [Cecil] Open preprocessor check */
+    if (bPreproc) {
+      _strCurrentPropertyList = stradd(_strCurrentPropertyList, "#if ");
+      _strCurrentPropertyList = stradd(_strCurrentPropertyList, strPreproc);
+    }
+
     _strCurrentPropertyList = stradd(_strCurrentPropertyList, strPropRef);
 
-    if (strlen(_strCurrentPropertyDefaultCode)>0) {
-      PrintImpl("  %s\n", _strCurrentPropertyDefaultCode);
+    /* [Cecil] Close preprocessor check */
+    if (bPreproc) {
+      _strCurrentPropertyList = stradd(_strCurrentPropertyList, "#endif //");
+      _strCurrentPropertyList = stradd(_strCurrentPropertyList, strPreproc);
     }
+
+    if (strlen(_strCurrentPropertyDefaultCode)>0) {
+      /* [Cecil] Open preprocessor check */
+      if (bPreproc) {
+        PrintImpl("#if %s", strPreproc);
+      }
+
+      PrintImpl("  %s\n", _strCurrentPropertyDefaultCode);
+
+      /* [Cecil] Close preprocessor check */
+      if (bPreproc) {
+        PrintImpl("#endif // %s", strPreproc);
+      }
+    }
+  }
+  ;
+
+/* [Cecil] Preprocessor check to wrap the property in */
+property_preproc_opt
+  : { $$ = "";}
+  | '[' c_string ']' {
+    /* Remove surrounding double quotes */
+    char *str = $2.strString;
+    int ct = strlen(str) - 1;
+    memmove(str, str + 1, ct);
+    str[ct - 1] = '\n';
+    str[ct - 0] = '\0';
+
+    $$ = $2;
   }
   ;
 
