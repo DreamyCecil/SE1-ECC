@@ -19,10 +19,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 int _iLinesCt = 1;
 int _bTrackLineInformation = 0; // This is set if #line should be inserted in tokens
 
-FILE *_fImplementation;
-FILE *_fDeclaration;
-FILE *_fTables;
-FILE *_fProps; // [Cecil] Property lists for all classes
+static FILE *_fImplementation;
+static FILE *_fDeclaration;
+static FILE *_fTables;
+static FILE *_fProps; // [Cecil] Property lists for all classes
 char *_strFileNameBase;
 char *_strFileNameBaseIdentifier;
 
@@ -33,7 +33,7 @@ bool _bCompatibilityMode = false;
 bool _bForceExport = false;
 
 // [Cecil] Output file for the list of property references
-char *_strPropListFile = "";
+static char *_strPropListFile = "";
 
 extern "C" int yywrap(void) {
   return 1;

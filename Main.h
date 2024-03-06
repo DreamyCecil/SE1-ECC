@@ -35,17 +35,12 @@ void yyerror(char *s);
 extern int _iLinesCt;
 extern int _bTrackLineInformation; // This is set if #line should be inserted in tokens
 
-extern FILE *_fImplementation;
-extern FILE *_fDeclaration;
-extern FILE *_fTables;
-extern FILE *_fProps; // [Cecil] Property lists for all classes
 extern char *_strFileNameBase;
 extern char *_strFileNameBaseIdentifier;
 
 // [Cecil] New options
 extern bool _bCompatibilityMode;
 extern bool _bForceExport;
-extern char *_strPropListFile;
 
 // Entity component flags
 #define CF_EDITOR (1UL << 1)
