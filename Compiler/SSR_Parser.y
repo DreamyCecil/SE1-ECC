@@ -275,7 +275,8 @@ uses_statement
 
     /* [Cecil] Print line directive before the used header */
     PrintDecl(LineDirective(true));
-    PrintDecl("#include <%s.h>\n", strUsedFileName+1);
+    /* [Cecil] Quotes instead of angle-brackets to allow more freedom */
+    PrintDecl("#include \"%s.h\"\n", strUsedFileName+1);
   }
   ;
 

@@ -273,7 +273,8 @@ uses_statement
   : k_uses c_string ';' {
     char *strUsedFileName = strdup($2.strString);
     strUsedFileName[strlen(strUsedFileName)-1] = 0;
-    PrintDecl("#include <%s.h>\n", strUsedFileName+1);
+    /* [Cecil] Quotes instead of angle-brackets to allow more freedom */
+    PrintDecl("#include \"%s.h\"\n", strUsedFileName+1);
   }
   ;
 
