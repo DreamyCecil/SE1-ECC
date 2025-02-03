@@ -51,9 +51,9 @@ Bin/*
 Obj/*
 
 # Build tools
-!Tools.Win32/*
+!Win32/*
 
 # Generated source files
-Parser.cpp
-Parser.h
-Scanner.cpp
+Source/Parser.cpp
+Source/Parser.h
+Source/Scanner.cpp
