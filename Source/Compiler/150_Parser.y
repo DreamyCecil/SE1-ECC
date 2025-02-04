@@ -8,6 +8,9 @@
 
 #define YYINITDEPTH 1000
 
+// [Cecil] ECC configuration description
+const char *_strCompilerConfig = "For 1.50";
+
 static const char *_strCurrentClass;
 static int _iCurrentClassID;
 static const char *_strCurrentBase;

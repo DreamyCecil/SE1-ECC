@@ -276,20 +276,35 @@ static void ReplaceIfChanged(const char *strOldFile, const char *strNewFile) {
   }
 };
 
+// [Cecil] Simply report ECC version and quit
+static void ReportEccVersion(const char *strArg) {
+  if (strncmp(strArg, "-version", 8) != 0) return;
+
+  extern const char *_strCompilerConfig;
+  printf("ECC configuration: %s\n", _strCompilerConfig);
+
+  exit(EXIT_SUCCESS);
+};
+
 // Entry point
 int main(int argc, char *argv[]) {
   // Print usage if not enough arguments
   if (argc < 2) {
-    printf("Usage: Ecc <es_file_name>\n"
-      "  -line : Compile without #line preprocessor directives pointing to places in the .es file\n"
+    printf("Usage: Ecc <es_file_name> [options]\n\n"
+      "Options:\n"
       "  -compat : Make compiled code compatible with vanilla Serious Sam SDK\n"
       "  -export : Export entity class regardless of the 'export' keyword after 'class'\n"
+      "  -line : Compile without #line preprocessor directives pointing to places in the .es file\n"
       "  -proplist <file> : Generate an inline file that defines a list of property references by variable name\n"
       "    If the file already exists, a list of this entity will be appended at the end of it\n"
       "    If the filename is '*', it defaults to '_DefinePropertyRefLists.inl' in the same directory as the .es file\n"
+      "  -version : Display ECC configuration version\n"
     );
     return EXIT_FAILURE;
   }
+
+  // [Cecil] Try to report ECC version
+  ReportEccVersion(argv[1]);
 
   // Remember input filename
   const char *strFileName = argv[1];
@@ -318,6 +333,10 @@ int main(int argc, char *argv[]) {
 
       iExtra++;
       _strPropListFile = argv[iExtra];
+
+    } else {
+      // [Cecil] Try to report ECC version
+      ReportEccVersion(argv[iExtra]);
     }
   }
 
