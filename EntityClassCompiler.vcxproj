@@ -129,22 +129,30 @@
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='ClassicsEnhanced|Win32'">pushd $(ProjectDir)
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">pushd $(ProjectDir)
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">pushd $(ProjectDir)
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">Creating parser source</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='ClassicsEnhanced|Win32'">Creating parser source</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">Creating parser source</Message>
@@ -198,7 +206,9 @@ del %(RootDir)%(Directory)..\Parser.c /q</Command>
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ClassicsEnhanced|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">true</ExcludedFromBuild>
@@ -206,17 +216,23 @@ del %(RootDir)%(Directory)..\Parser.c /q</Command>
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='ClassicsEnhanced|Win32'">pushd $(ProjectDir)
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">pushd $(ProjectDir)
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">Creating parser source</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='ClassicsEnhanced|Win32'">Creating parser source</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">Creating parser source</Message>
@@ -246,22 +262,30 @@ del %(RootDir)%(Directory)..\Parser.c /q</Command>
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='ClassicsEnhanced|Win32'">pushd $(ProjectDir)
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">pushd $(ProjectDir)
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">pushd $(ProjectDir)
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">Creating parser source</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='ClassicsEnhanced|Win32'">Creating parser source</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">Creating parser source</Message>
@@ -304,22 +328,30 @@ del %(RootDir)%(Directory)..\Parser.c /q</Command>
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">pushd $(ProjectDir)
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">pushd $(ProjectDir)
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='ClassicsEnhanced|Win32'">pushd $(ProjectDir)
 bison -o%(RootDir)%(Directory)..\Parser.c Source/Compiler/%(Filename).y -d
 popd
 copy %(RootDir)%(Directory)..\Parser.c %(RootDir)%(Directory)..\Parser.cpp
-del %(RootDir)%(Directory)..\Parser.c /q</Command>
+del %(RootDir)%(Directory)..\Parser.c /q
+copy %(RootDir)%(Directory)..\Parser.h %(RootDir)%(Directory)..\Parser.hpp
+del %(RootDir)%(Directory)..\Parser.h /q</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">true</ExcludedFromBuild>

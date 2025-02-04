@@ -16,11 +16,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // [Cecil] Moved under a separate file
 #include "StringType.h"
 
-// rcg10042001
-#ifdef PLATFORM_WIN32
-  #define alloca _alloca
-#endif
-
 #ifndef MAXPATHLEN
   #define MAXPATHLEN 256
 #endif
@@ -30,7 +25,7 @@ int yylex(void);
 int yyparse(void);
 
 // Report error during parsing
-void yyerror(char *s);
+void yyerror(const char *s);
 
 extern int _iLinesCt;
 extern int _bTrackLineInformation; // This is set if #line should be inserted in tokens
@@ -51,7 +46,7 @@ char *LineDirective(int bNewLine);
 
 // [Cecil] Moved out of the parser file
 char *RemoveLineDirective(char *str);
-char *GetLineDirective(SType &st);
+const char *GetLineDirective(SType &st);
 
 // [Cecil] Special printing methods
 void PrintDecl(const char *strFormat, ...);

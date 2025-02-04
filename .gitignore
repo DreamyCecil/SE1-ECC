@@ -55,5 +55,6 @@ Obj/*
 
 # Generated source files
 Source/Parser.cpp
+Source/Parser.hpp
 Source/Parser.h
 Source/Scanner.cpp

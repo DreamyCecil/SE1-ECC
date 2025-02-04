@@ -93,7 +93,7 @@ char *RemoveLineDirective(char *str) {
 };
 
 // [Cecil] Moved out of the parser file
-char *GetLineDirective(SType &st) {
+const char *GetLineDirective(SType &st) {
   char *str = st.strString;
 
   if (str[0] == '\n' && str[1] == '#' && str[2] == 'l') {
@@ -141,7 +141,7 @@ bool IsPropListOpen(void) {
 };
 
 // Report error during parsing
-void yyerror(char *s) {
+void yyerror(const char *s) {
   fprintf(stderr, "%s(%d): Error: %s\n", _strInputFileName, _iLinesCt, s);
   _bError = true;
 };
@@ -371,6 +371,8 @@ int main(int argc, char *argv[]) {
 
   // Get filename as a preprocessor-usable identifier
   _strFileNameBase = ChangeExt(strFileName, "");
+  ReplaceChar(_strFileNameBase, '\\', '/'); // [Cecil] Convert path slashes for includes
+
   _strFileNameBaseIdentifier = strdup(_strFileNameBase);
 
   // [Cecil] Replace all non-alphanumeric characters

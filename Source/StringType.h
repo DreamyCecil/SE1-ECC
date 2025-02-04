@@ -37,7 +37,7 @@ struct SType {
   };
 
   // Assignment from a string
-  const SType &operator=(char *str) {
+  const SType &operator=(const char *str) {
     Set(str);
     return *this;
   };

@@ -18,11 +18,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <malloc.h>
 #include <stdarg.h>
 #include <math.h>
 
-#ifdef PLATFORM_UNIX
+#ifdef _WIN32
+  #include <malloc.h>
+#else
   #include <errno.h>
   #include <sys/param.h>
   #include <unistd.h>
