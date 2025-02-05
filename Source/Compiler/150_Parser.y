@@ -154,6 +154,9 @@ void DeclareFeatureProperties(void)
 /* specially bracketed cpp blocks */
 %token cppblock
 
+/* [Cecil] Preprocessor directive */
+%token preproc
+
 /* standard cpp-keywords */
 %token k_while
 %token k_for
@@ -213,6 +216,8 @@ void DeclareFeatureProperties(void)
 %token k_FLOAT
 %token k_INDEX
 %token k_TIME
+%token k_U64
+%token k_DOUBLE
 %token k_RANGE
 %token k_CEntityPointer
 %token k_CModelObject
@@ -941,7 +946,13 @@ function_list
   ;
 
 function_implementation
-  : opt_export opt_virtual return_type opt_tilde identifier '(' parameters_list ')' opt_const
+  : preproc {
+    /* [Cecil] Preprocessor directives inbetween functions */
+    char *strPreproc = $1.strString;
+    PrintDecl("%s", strPreproc);
+    PrintImpl("%s", strPreproc);
+  }
+  | opt_export opt_virtual return_type opt_tilde identifier '(' parameters_list ')' opt_const
   '{' statements '}' opt_semicolon {
     const char *strReturnType = $3.strString;
     const char *strFunctionHeader = ($4+$5+$6+$7+$8+$9).strString;
@@ -1143,6 +1154,7 @@ statement
   | k_case case_constant_expression ':' {$$=$1+" "+$2+$3+" ";}
   | '{' statements '}' {$$=$1+$2+$3;}
   | expression '{' statements '}' {$$=$1+$2+$3+$4;}
+  | preproc { $$ = $1; } /* [Cecil] Inline preprocessor directives */
   | statement_while
   | statement_dowhile
   | statement_for

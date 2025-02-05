@@ -66,8 +66,8 @@ EXP_FLT (({DIGIT}+("."({DIGIT}*)?)?)("E"|"e")("+"|"-")?{DIGIT}+)
 "texture" {RETURN(k_texture);}
 "sound"   {RETURN(k_sound);}
 "model"   {RETURN(k_model);}
-"skamodel" {RETURN(k_skamodel);}
-"editor"   {RETURN(k_editor);}
+"skamodel" {RETURN(k_skamodel);} /* [Cecil] 1.50: SKA model config */
+"editor"   {RETURN(k_editor);} /* [Cecil] 1.50: Editor component */
 
 "properties"  {RETURN(k_properties);}
 "components"  {RETURN(k_components);}
@@ -94,6 +94,8 @@ EXP_FLT (({DIGIT}+("."({DIGIT}*)?)?)("E"|"e")("+"|"-")?{DIGIT}+)
 "FLOAT"             {RETURN(k_FLOAT);}
 "INDEX"             {RETURN(k_INDEX);}
 "TIME"              {RETURN(k_TIME);} /* [Cecil] Expanded timer type */
+"U64"               {RETURN(k_U64);} /* [Cecil] Rev: 64-bit integer */
+"DOUBLE"            {RETURN(k_DOUBLE);} /* [Cecil] Rev: 64-bit float value */
 "RANGE"             {RETURN(k_RANGE);}
 "CEntityPointer"    {RETURN(k_CEntityPointer);}
 "CModelObject"      {RETURN(k_CModelObject);}
@@ -145,18 +147,16 @@ EXP_FLT (({DIGIT}+("."({DIGIT}*)?)?)("E"|"e")("+"|"-")?{DIGIT}+)
   _strCppBlock = (SType(_strCppBlock)+yytext).strString;
 }
 
- /* special handling for preprocessor directives */
+ /* [Cecil] Parse preprocessor directives until a line break */
 "#" {
-  _strPreProc = stradd(LineDirective(false), "#");
+  _strPreProc = strdup("\n#");
   BEGIN(PREPROC);
 }
 <PREPROC>\n {
   BEGIN(INITIAL);
   _iLinesCt++;
-  _strPreProc = (SType(_strPreProc)+yytext).strString;
-  PrintDecl("%s", _strPreProc);
-  PrintTable("%s", _strPreProc);
-  PrintImpl("%s", _strPreProc);
+  yylval = SType(_strPreProc)+yytext;
+  return preproc;
 }
 <PREPROC>.*   {
   _strPreProc = (SType(_strPreProc)+yytext).strString;
