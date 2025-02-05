@@ -48,6 +48,7 @@ Debug/
 
 # Build directories
 Bin/*
+cmake-build/*
 Obj/*
 
 # Build tools
