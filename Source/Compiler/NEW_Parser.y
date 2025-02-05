@@ -196,6 +196,8 @@ void DeclareFeatureProperties(void)
 %token k_texture
 %token k_sound
 %token k_model
+%token k_skamodel
+%token k_editor
 
 %token k_properties
 %token k_components
@@ -222,6 +224,8 @@ void DeclareFeatureProperties(void)
 %token k_FLOAT
 %token k_INDEX
 %token k_TIME
+%token k_U64
+%token k_DOUBLE
 %token k_RANGE
 %token k_CEntityPointer
 %token k_CModelObject

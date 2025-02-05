@@ -1,6 +1,8 @@
 %{
 #include "StdH.h"
 
+#include <set>
+
 // [Cecil] Ignore GCC attributes on Unix
 #ifdef __GNUC__
   #define __attribute__(x)
@@ -30,6 +32,9 @@ static const char *_strCurrentPropertyColor;
 static const char *_strCurrentPropertyFlags;
 static const char *_strCurrentPropertyDefaultCode;
 
+// [Cecil] Set of unique property/component IDs
+static std::set<int> _aUniqueIDs;
+
 static char *_strCurrentEventList;
 static char *_strCurrentEventCheck;
 
@@ -56,6 +61,7 @@ static char _strCurrentStateID[256];
 static int _bInProcedure;   // set if currently compiling a procedure
 static int _bInHandler;
 static int _bHasOtherwise;  // set if current 'wait' block has an 'otherwise' statement
+static int _bInlineFunc; // [Cecil] Define an inline function
 
 static const char *_strCurrentEvent;
 static int _bFeature_AbstractBaseClass;
@@ -118,19 +124,13 @@ void CreateInternalHandlerFunction(char *strFunctionName, char *strID)
 void DeclareFeatureProperties(void)
 {
   if (_bFeature_CanBePredictable) {
-    PrintTable(" CEntityProperty(CEntityProperty::EPT_ENTITYPTR, NULL, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, %s, %s),\n",
-      _iCurrentClassID,
-      "255",
-      _strCurrentClass,
-      "m_penPrediction",
-      "\"\"",
-      "0",
-      "0",
-      "0");
-    PrintDecl("  %s %s;\n",
-      "CEntityPointer",
-      "m_penPrediction"
-      );
+    /* [Cecil] Print entity property entry separately */
+    char strPropClass[1024];
+    sprintf(strPropClass, "CEntityProperty(CEntityProperty::EPT_ENTITYPTR, NULL, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, %s, %s)",
+      _iCurrentClassID, "255", _strCurrentClass, "m_penPrediction", "\"\"", "0", "0", "0");
+
+    PrintTable(" %s,\n", strPropClass);
+    PrintDecl("  CEntityPointer m_penPrediction;\n");
     PrintImpl("  m_penPrediction = NULL;\n");
   }
 }
@@ -288,6 +288,9 @@ uses_statement
   : k_uses c_string ';' {
     char *strUsedFileName = strdup($2.strString);
     strUsedFileName[strlen(strUsedFileName)-1] = 0;
+
+    /* [Cecil] Print line directive before the used header */
+    PrintDecl(LineDirective(true));
     /* [Cecil] Quotes instead of angle-brackets to allow more freedom */
     PrintDecl("#include \"%s.h\"\n", strUsedFileName+1);
   }
@@ -423,6 +426,9 @@ class_declaration
       PrintTable("#define %s_eventsct 0\n", _strCurrentClass);
     }
 
+    /* [Cecil] Define class ID */
+    PrintDecl("#define %s_ClassID %d\n", _strCurrentClass, _iCurrentClassID);
+
     PrintTable("#define ENTITYCLASS %s\n\n", _strCurrentClass);
     PrintDecl("extern \"C\" DECL_DLL CDLLEntityClass %s_DLLClass;\n",
       _strCurrentClass);
@@ -434,10 +440,17 @@ class_declaration
     PrintImpl("void %s::SetDefaultProperties(void) {\n", _strCurrentClass);
     PrintTable("CEntityProperty %s_properties[] = {\n", _strCurrentClass);
 
+    /* [Cecil] Clear unique IDs for properties */
+    _aUniqueIDs.clear();
+
   } k_properties ':' property_declaration_list {
     PrintImpl("  %s::SetDefaultProperties();\n}\n", _strCurrentBase);
 
     PrintTable("CEntityComponent %s_components[] = {\n", _strCurrentClass);
+
+    /* [Cecil] Clear unique IDs for components */
+    _aUniqueIDs.clear();
+
   } opt_internal_properties {
   } k_components ':' component_declaration_list {
     _bTrackLineInformation = 1;
@@ -514,8 +527,20 @@ class_declaration
   ;
 
 class_optexport
-  : k_class { $$ = $1; _bClassIsExported = 0; }
-  | k_class k_export { $$ = $1+" DECL_DLL "; _bClassIsExported = 1; }
+  : k_class {
+    // [Cecil] Force class export
+    if (_bForceExport) {
+      $$ = $1 + " DECL_DLL ";
+    } else {
+      $$ = $1;
+    }
+
+    _bClassIsExported = _bForceExport;
+  }
+  | k_class k_export {
+    $$ = $1 + " DECL_DLL ";
+    _bClassIsExported = 1;
+  }
   ;
 
 opt_features
@@ -603,16 +628,13 @@ property_declaration_list
   : empty_property_declaration_list {
     DeclareFeatureProperties(); // this won't work, but at least it will generate an error!!!!
     PrintTable("  CEntityProperty()\n};\n");
-    PrintTable("#define %s_propertiesct 0\n", _strCurrentClass);
-    PrintTable("\n");
-    PrintTable("\n");
+    PrintTable("#define %s_propertiesct 0\n\n\n", _strCurrentClass);
   }
   | nonempty_property_declaration_list opt_comma {
     DeclareFeatureProperties();
     PrintTable("};\n");
-    PrintTable("#define %s_propertiesct ARRAYCOUNT(%s_properties)\n", 
+    PrintTable("#define %s_propertiesct ARRAYCOUNT(%s_properties)\n\n", 
       _strCurrentClass, _strCurrentClass);
-    PrintTable("\n");
   }
   ;
 nonempty_property_declaration_list
@@ -624,10 +646,28 @@ empty_property_declaration_list
   ;
 
 property_declaration
-  : property_id property_type property_identifier property_wed_name_opt property_default_opt property_flags_opt {
+  : property_preproc_opt property_id property_type property_identifier property_wed_name_opt property_default_opt property_flags_opt {
+    /* [Cecil] Disallow using 255 as a property ID */
     int iPropertyID = atoi(_strCurrentPropertyID);
-    if (iPropertyID > 255) {     
-      yyerror((SType("property id greater then 255, property: ")+$3).strString);
+    if (iPropertyID == 255) {
+      yyerror((SType("property ID 255 may conflict with 'm_penPrediction', property: ") + $4).strString);
+    }
+
+    /* [Cecil] Disallow IDs that have been previously used */
+    if (_aUniqueIDs.find(iPropertyID) != _aUniqueIDs.end()) {
+      yyerror((SType("encountered repeating property ID ") + _strCurrentPropertyID + ", property: " + $4).strString);
+    }
+
+    /* [Cecil] Add another ID */
+    _aUniqueIDs.insert(iPropertyID);
+
+    /* [Cecil] Open preprocessor check */
+    const char *strPreproc = $1.strString;
+    bool bPreproc = (strcmp(strPreproc, "") != 0);
+
+    if (bPreproc) {
+      PrintTable("#if %s", strPreproc);
+      PrintDecl("#if %s", strPreproc);
     }
 
     PrintTable(" CEntityProperty(%s, %s, (0x%08x<<8)+%s, offsetof(%s, %s), %s, %s, %s, %s),\n",
@@ -641,14 +681,45 @@ property_declaration
       _strCurrentPropertyShortcut,
       _strCurrentPropertyColor,
       _strCurrentPropertyFlags);
+
     PrintDecl("  %s %s;\n",
       _strCurrentPropertyDataType,
-      _strCurrentPropertyIdentifier
-      );
+      _strCurrentPropertyIdentifier);
+
+    /* [Cecil] Close preprocessor check */
+    if (bPreproc) {
+      PrintTable("#endif // %s", strPreproc);
+      PrintDecl("#endif // %s", strPreproc);
+    }
 
     if (strlen(_strCurrentPropertyDefaultCode)>0) {
+      /* [Cecil] Open preprocessor check */
+      if (bPreproc) {
+        PrintImpl("#if %s", strPreproc);
+      }
+
       PrintImpl("  %s\n", _strCurrentPropertyDefaultCode);
+
+      /* [Cecil] Close preprocessor check */
+      if (bPreproc) {
+        PrintImpl("#endif // %s", strPreproc);
+      }
     }
+  }
+  ;
+
+/* [Cecil] Preprocessor check to wrap the property in */
+property_preproc_opt
+  : { $$ = "";}
+  | '[' c_string ']' {
+    /* Remove surrounding double quotes */
+    char *str = $2.strString;
+    int ct = strlen(str) - 1;
+    memmove(str, str + 1, ct);
+    str[ct - 1] = '\n';
+    str[ct - 0] = '\0';
+
+    $$ = $2;
   }
   ;
 
@@ -894,7 +965,17 @@ empty_component_declaration_list
 
 component_declaration
   : component_id opt_component_flags component_type component_identifier component_filename {
-  PrintTable("#define %s ((0x%08x<<8)+%s)\n",
+    int iComponentID = atoi(_strCurrentComponentID);
+
+    /* [Cecil] Disallow IDs that have been previously used */
+    if (_aUniqueIDs.find(iComponentID) != _aUniqueIDs.end()) {
+      yyerror((SType("encountered repeating component ID ") + _strCurrentComponentID + ", component: " + $4).strString);
+    }
+
+    /* [Cecil] Add another ID */
+    _aUniqueIDs.insert(iComponentID);
+
+    PrintTable("#define %s ((0x%08x<<8)+%s)\n",
       _strCurrentComponentIdentifier,
       _iCurrentClassID,
       _strCurrentComponentID);
@@ -952,11 +1033,11 @@ function_implementation
     PrintDecl("%s", strPreproc);
     PrintImpl("%s", strPreproc);
   }
-  | opt_export opt_virtual return_type opt_tilde identifier '(' parameters_list ')' opt_const
-  '{' statements '}' opt_semicolon {
+  | opt_export opt_modifier return_type opt_tilde identifier '(' parameters_list ')' opt_const
+  opt_funcbody opt_semicolon {
     const char *strReturnType = $3.strString;
     const char *strFunctionHeader = ($4+$5+$6+$7+$8+$9).strString;
-    const char *strFunctionBody = ($10+$11+$12).strString;
+    const char *strFunctionBody = $10.strString;
     if (strcmp($5.strString, _strCurrentClass)==0) {
       if (strcmp(strReturnType+strlen(strReturnType)-4, "void")==0 ) {
         strReturnType = "";
@@ -964,10 +1045,23 @@ function_implementation
         yyerror("use 'void' as return type for constructors");
       }
     }
-    PrintDecl(" %s %s %s %s;\n", 
-      $1.strString, $2.strString, strReturnType, strFunctionHeader);
-    PrintImpl("  %s %s::%s %s\n", 
-      strReturnType, _strCurrentClass, strFunctionHeader, strFunctionBody);
+    /* [Cecil] Declaration beginning */
+    PrintDecl(" %s %s %s %s", $1.strString, $2.strString, strReturnType, strFunctionHeader);
+
+    /* [Cecil] No implementation if no function body */
+    if (strlen(strFunctionBody) > 0) {
+      /* [Cecil] Inline implementation */
+      if (_bInlineFunc) {
+        PrintDecl(" %s", strFunctionBody);
+      } else {
+        PrintImpl("  %s %s::%s %s\n", 
+          strReturnType, _strCurrentClass, strFunctionHeader, strFunctionBody);
+      }
+    }
+
+    /* [Cecil] Declaration ending */
+    PrintDecl(";\n");
+    _bInlineFunc = 0;
   }
   ;
 opt_tilde
@@ -990,9 +1084,15 @@ opt_const
   : { $$ = "";}
   | k_const { $$ = $1; }
   ;
-opt_virtual
+/* [Cecil] Function modifier */
+opt_modifier
   : { $$ = "";}
   | k_virtual { $$ = $1; }
+  /* [Cecil] Inline function definition */
+  | k_inline {
+    _bInlineFunc = 1;
+    $$ = $1;
+  }
   ;
 opt_semicolon
   : /* null */
@@ -1014,6 +1114,12 @@ parameter_declaration
 return_type 
   : any_type
   | k_void
+  ;
+
+/* [Cecil] Optional function body */
+opt_funcbody
+  : { $$ = ""; }
+  | '{' statements '}' { $$ = $1+$2+$3; }
   ;
 
 any_type
