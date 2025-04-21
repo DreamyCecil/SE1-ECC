@@ -33,7 +33,7 @@ static const char *_strCurrentPropertyFlags;
 static const char *_strCurrentPropertyDefaultCode;
 
 // [Cecil] Default config properties for this compiler
-SConfigProperty _aDefaultConfigProps[] = {
+const char *_aDefaultConfigProps[][3] = {
   #include "Configs/110.inl"
 };
 size_t _ctDefaultConfigProps = sizeof(_aDefaultConfigProps) / sizeof(_aDefaultConfigProps[0]);
@@ -703,26 +703,16 @@ property_type
   }
   | any_type {
     /* [Cecil] Parser of any entity property type based on compiler configs */
-    bool bNotFound = true;
+    CConfigPropMap::const_iterator it = _mapConfigProps.find($1.strString);
 
-    std::list<SConfigProperty>::const_iterator it;
+    /* If the entity source type was found */
+    if (it != _mapConfigProps.end()) {
+      /* Set appropriate property type and variable type */
+      _strCurrentPropertyPropertyType = strdup(it->second.strEntityPropType.c_str());
+      _strCurrentPropertyEnumType = "NULL";
+      _strCurrentPropertyDataType = strdup(it->second.strVariableType.c_str());
 
-    for (it = _aConfigProps.begin(); it != _aConfigProps.end(); it++) {
-      const SConfigProperty &prop = *it;
-
-      /* If the entity source type matches */
-      if (strcmp($1.strString, prop.strSourceType) == 0) {
-        /* Set appropriate property type and variable type */
-        _strCurrentPropertyPropertyType = prop.strEntityPropType;
-        _strCurrentPropertyEnumType = "NULL";
-        _strCurrentPropertyDataType = prop.strVariableType;
-
-        bNotFound = false;
-        break;
-      }
-    }
-
-    if (bNotFound) {
+    } else {
       yyerror((SType("unknown property type: ") + $1).strString);
     }
   }
@@ -1079,9 +1069,9 @@ expression
   ;
 type_keyword
   : k_CTString|k_CTStringTrans|k_CTFileName|k_CTFileNameNoDep
-  | k_BOOL|k_COLOR|k_FLOAT|k_INDEX|k_TIME|k_RANGE
+  | k_BOOL|k_COLOR|k_FLOAT|k_INDEX|k_TIME|k_RANGE|k_U64|k_DOUBLE
   | k_CEntityPointer|k_CModelObject|k_CModelInstance|k_CAnimObject|k_CSoundObject
-  | k_CPlacement3D | k_FLOATaabbox3D|k_FLOATmatrix3D| k_FLOATquat3D|k_ANGLE|k_ANIMATION|k_ILLUMINATIONTYPE
+  | k_CPlacement3D | k_FLOATaabbox3D|k_FLOATmatrix3D|k_FLOATquat3D|k_ANGLE|k_ANIMATION|k_ILLUMINATIONTYPE
   | k_ANGLE3D|k_FLOAT3D|k_FLOATplane3D
   | k_const 
   | k_static

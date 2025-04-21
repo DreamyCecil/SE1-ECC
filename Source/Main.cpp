@@ -16,6 +16,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "StdH.h"
 #include "Main.h"
 
+// [Cecil] Bison/Flex scares the hell out of me, so I'm gonna use my own parser for config files, thank you
+#if !defined(_DEBUG) && !defined(NDEBUG)
+  #define NDEBUG
+#endif
+#include "../DreamyUtilities/DreamyUtilities.cpp"
+
 int _iLinesCt = 1;
 int _bTrackLineInformation = 0; // This is set if #line should be inserted in tokens
 
@@ -33,10 +39,13 @@ bool _bCompatibilityMode = false;
 bool _bForceExport = false;
 
 // [Cecil] Defined property types for the compiler
-std::list<SConfigProperty> _aConfigProps;
+CConfigPropMap _mapConfigProps;
+
+// [Cecil] Optional config file for the compiler
+static const char *_strConfigFile = "";
 
 // [Cecil] Output file for the list of property references
-static char *_strPropListFile = "";
+static const char *_strPropListFile = "";
 
 extern "C" int yywrap(void) {
   return 1;
@@ -295,6 +304,7 @@ int main(int argc, char *argv[]) {
   if (argc < 2) {
     printf("Usage: Ecc <es_file_name> [options]\n\n"
       "Options:\n"
+      "  -cfg <file> : Specify path to an optional compiler config for extra customization\n"
       "  -compat : Make compiled code compatible with vanilla Serious Sam SDK\n"
       "  -export : Export entity class regardless of the 'export' keyword after 'class'\n"
       "  -line : Compile without #line preprocessor directives pointing to places in the .es file\n"
@@ -337,6 +347,16 @@ int main(int argc, char *argv[]) {
       iExtra++;
       _strPropListFile = argv[iExtra];
 
+    } else if (strncmp(argv[iExtra], "-cfg", 9) == 0) {
+      // Try to get the filename
+      if (iExtra == argc - 1) {
+        fprintf(stderr, "%s: Warning: No config file specified after the '-cfg' argument\n", _strInputFileName);
+        break;
+      }
+
+      iExtra++;
+      _strConfigFile = argv[iExtra];
+
     } else {
       // [Cecil] Try to report ECC version
       ReportEccVersion(argv[iExtra]);
@@ -362,7 +382,7 @@ int main(int argc, char *argv[]) {
   int iPropsOpen = 0;
 
   if (IsPropListOpen()) {
-    char *strFile = _strPropListFile;
+    const char *strFile = _strPropListFile;
 
     // Use default filename in the same directory
     if (strcmp(_strPropListFile, "*") == 0) {
@@ -447,11 +467,59 @@ int main(int argc, char *argv[]) {
   }
 
   // [Cecil] Fill list of property types with default types
-  extern SConfigProperty _aDefaultConfigProps[];
+  extern const char *_aDefaultConfigProps[][3];
   extern size_t _ctDefaultConfigProps;
 
   for (size_t iProp = 0; iProp < _ctDefaultConfigProps; iProp++) {
-    _aConfigProps.push_back(_aDefaultConfigProps[iProp]);
+    const char **aProp = _aDefaultConfigProps[iProp];
+    _mapConfigProps[aProp[0]] = SConfigProperty(aProp[1], aProp[2]);
+  }
+
+  // [Cecil] Fill list of property types with config types that can also override default types
+  dreamy::CString strConfig;
+
+  if (dreamy::ReadTextFileIfPossible(_strConfigFile, strConfig)) {
+    // Tokenize ASCII file
+    dreamy::CTokenList aTokens;
+    dreamy::TokenizeString(aTokens, strConfig);
+
+    dreamy::CTokenList::const_iterator it;
+
+    #define EXPECT_NEXT_TOKEN(_Type) { \
+      ++it; \
+      if (it == aTokens.end()) break; \
+      if (it->GetType() != _Type) break; \
+    }
+
+    dreamy::CString astr[3];
+
+    for (it = aTokens.begin(); it != aTokens.end(); ++it)
+    {
+      // Skip non-keyword tokens
+      if (it->GetType() != dreamy::CParserToken::TKN_IDENTIFIER) continue;
+
+      // Not a property type
+      if (it->GetValue().ToString() != "ECC_PROP_TYPE") continue;
+
+      // Retrieve 3 strings from 'ECC_PROP_TYPE("string1", "string2", "string3")'
+      EXPECT_NEXT_TOKEN(dreamy::CParserToken::TKN_PAR_OPEN);
+      {
+        EXPECT_NEXT_TOKEN(dreamy::CParserToken::TKN_VALUE);
+        astr[0] = it->GetValue().ToString();
+        EXPECT_NEXT_TOKEN(dreamy::CParserToken::TKN_COMMA);
+
+        EXPECT_NEXT_TOKEN(dreamy::CParserToken::TKN_VALUE);
+        astr[1] = it->GetValue().ToString();
+        EXPECT_NEXT_TOKEN(dreamy::CParserToken::TKN_COMMA);
+
+        EXPECT_NEXT_TOKEN(dreamy::CParserToken::TKN_VALUE);
+        astr[2] = it->GetValue().ToString();
+      }
+      EXPECT_NEXT_TOKEN(dreamy::CParserToken::TKN_PAR_CLOSE);
+
+      // Add new property type to the list
+      _mapConfigProps[astr[0]] = SConfigProperty(astr[1], astr[2]);
+    }
   }
 
   // Parse input file and generate the output files

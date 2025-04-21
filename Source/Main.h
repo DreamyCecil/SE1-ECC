@@ -18,7 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
-#include <list>
+#include <unordered_map>
+#include <string>
 
 // [Cecil] Moved under a separate file
 #include "StringType.h"
@@ -46,18 +47,19 @@ extern bool _bForceExport;
 
 // [Cecil] Custom property type defined by a config
 struct SConfigProperty {
-  const char *strSourceType;
-  const char *strEntityPropType;
-  const char *strVariableType;
+  std::string strEntityPropType;
+  std::string strVariableType;
 
-  inline SConfigProperty(const char *strSetSource, const char *strSetProp, const char *strSetVar) :
-    strSourceType(strSetSource), strEntityPropType(strSetProp), strVariableType(strSetVar) {};
+  inline SConfigProperty() {};
+  inline SConfigProperty(const std::string &strSetProp, const std::string &strSetVar) :
+    strEntityPropType(strSetProp), strVariableType(strSetVar) {};
 };
 
-#define ECC_PROP_TYPE(_SourceType, _PropType, _VarType) SConfigProperty(_SourceType, _PropType, _VarType),
+#define ECC_PROP_TYPE(_SourceType, _PropType, _VarType) { _SourceType, _PropType, _VarType },
 
-// [Cecil] Defined property types for the compiler
-extern std::list<SConfigProperty> _aConfigProps;
+// [Cecil] Defined property types by their name in the ES file for the compiler
+typedef std::unordered_map<std::string, SConfigProperty> CConfigPropMap;
+extern CConfigPropMap _mapConfigProps;
 
 // Entity component flags
 #define CF_EDITOR (1UL << 1)

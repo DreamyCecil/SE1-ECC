@@ -1,0 +1,3 @@
+[submodule "DreamyUtilities"]
+	path = DreamyUtilities
+	url = https://github.com/DreamyCecil/DreamyUtilities.git
