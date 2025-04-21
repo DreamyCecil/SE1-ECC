@@ -13,6 +13,11 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
+#ifndef SE1ECC_INCL_MAIN_H
+#define SE1ECC_INCL_MAIN_H
+
+#pragma once
+
 // [Cecil] Moved under a separate file
 #include "StringType.h"
 
@@ -56,3 +61,5 @@ void PrintProps(const char *strFormat, ...);
 
 // [Cecil] Check if the property list file is open
 bool IsPropListOpen(void);
+
+#endif // SE1ECC_INCL_MAIN_H

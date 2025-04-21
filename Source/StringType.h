@@ -13,6 +13,9 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
+#ifndef SE1ECC_INCL_STRINGTYPE_H
+#define SE1ECC_INCL_STRINGTYPE_H
+
 #pragma once
 
 // String type for the parser
@@ -67,3 +70,5 @@ struct SType {
 };
 
 #define YYSTYPE SType
+
+#endif // SE1ECC_INCL_STRINGTYPE_H
