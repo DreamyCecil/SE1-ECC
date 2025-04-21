@@ -18,6 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
+#include <list>
+
 // [Cecil] Moved under a separate file
 #include "StringType.h"
 
@@ -41,6 +43,21 @@ extern char *_strFileNameBaseIdentifier;
 // [Cecil] New options
 extern bool _bCompatibilityMode;
 extern bool _bForceExport;
+
+// [Cecil] Custom property type defined by a config
+struct SConfigProperty {
+  const char *strSourceType;
+  const char *strEntityPropType;
+  const char *strVariableType;
+
+  inline SConfigProperty(const char *strSetSource, const char *strSetProp, const char *strSetVar) :
+    strSourceType(strSetSource), strEntityPropType(strSetProp), strVariableType(strSetVar) {};
+};
+
+#define ECC_PROP_TYPE(_SourceType, _PropType, _VarType) SConfigProperty(_SourceType, _PropType, _VarType),
+
+// [Cecil] Defined property types for the compiler
+extern std::list<SConfigProperty> _aConfigProps;
 
 // Entity component flags
 #define CF_EDITOR (1UL << 1)

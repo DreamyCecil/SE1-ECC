@@ -32,6 +32,12 @@ static const char *_strCurrentPropertyColor;
 static const char *_strCurrentPropertyFlags;
 static const char *_strCurrentPropertyDefaultCode;
 
+// [Cecil] Default config properties for this compiler
+SConfigProperty _aDefaultConfigProps[] = {
+  #include "Configs/110.inl"
+};
+size_t _ctDefaultConfigProps = sizeof(_aDefaultConfigProps) / sizeof(_aDefaultConfigProps[0]);
+
 // [Cecil] Set of unique property/component IDs
 static std::set<int> _aUniqueIDs;
 
@@ -672,7 +678,7 @@ property_preproc_opt
   | '[' c_string ']' {
     /* Remove surrounding double quotes */
     char *str = $2.strString;
-    int ct = strlen(str) - 1;
+    size_t ct = strlen(str) - 1;
     memmove(str, str + 1, ct);
     str[ct - 1] = '\n';
     str[ct - 0] = '\0';
@@ -695,130 +701,30 @@ property_type
     _strCurrentPropertyEnumType = (SType("&")+$2+"_enum").strString; 
     _strCurrentPropertyDataType = "ULONG";
   }
-  | k_CTString {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_STRING"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "CTString";
-  }
-  | k_CTStringTrans {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_STRINGTRANS"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "CTStringTrans";
-  }
-  | k_CTFileName {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_FILENAME"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "CTFileName";
-  }
-  | k_CTFileNameNoDep {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_FILENAMENODEP"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "CTFileNameNoDep";
-  }
-  | k_BOOL {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_BOOL"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "BOOL";
-  }
-  | k_COLOR {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_COLOR"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "COLOR";
-  }
-  | k_FLOAT {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_FLOAT"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "FLOAT";
-  }
-  | k_INDEX {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_INDEX"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "INDEX";
-  }
-  | k_TIME { /* [Cecil] Expanded timer type */
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_FLOAT"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "TIME";
-  }
-  | k_RANGE {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_RANGE"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "RANGE";
-  }
-  | k_CEntityPointer {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_ENTITYPTR"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "CEntityPointer";
-  }
-  | k_CModelObject {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_MODELOBJECT"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "CModelObject";
-  }
-  | k_CModelInstance {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_MODELINSTANCE"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "CModelInstance";
-  }
-  | k_CAnimObject {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_ANIMOBJECT"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "CAnimObject";
-  }
-  | k_CSoundObject {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_SOUNDOBJECT"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "CSoundObject";
-  }
-  | k_CPlacement3D {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_PLACEMENT3D"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "CPlacement3D";
-  }
-  | k_FLOATaabbox3D {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_FLOATAABBOX3D"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "FLOATaabbox3D";
-  }
-  | k_FLOATmatrix3D {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_FLOATMATRIX3D"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "FLOATmatrix3D";
-  }
-  | k_FLOATquat3D {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_FLOATQUAT3D"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "FLOATquat3D";
-  }
-  | k_ANGLE {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_ANGLE"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "ANGLE";
-  }
-  | k_ANGLE3D {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_ANGLE3D"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "ANGLE3D";
-  }
-  | k_FLOAT3D {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_FLOAT3D"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "FLOAT3D";
-  }
-  | k_FLOATplane3D {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_FLOATplane3D"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "FLOATplane3D";
-  }
-  | k_ILLUMINATIONTYPE {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_ILLUMINATIONTYPE"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "ILLUMINATIONTYPE";
-  }
-  | k_ANIMATION {
-    _strCurrentPropertyPropertyType = "CEntityProperty::EPT_ANIMATION"; 
-    _strCurrentPropertyEnumType = "NULL"; 
-    _strCurrentPropertyDataType = "ANIMATION";
+  | any_type {
+    /* [Cecil] Parser of any entity property type based on compiler configs */
+    bool bNotFound = true;
+
+    std::list<SConfigProperty>::const_iterator it;
+
+    for (it = _aConfigProps.begin(); it != _aConfigProps.end(); it++) {
+      const SConfigProperty &prop = *it;
+
+      /* If the entity source type matches */
+      if (strcmp($1.strString, prop.strSourceType) == 0) {
+        /* Set appropriate property type and variable type */
+        _strCurrentPropertyPropertyType = prop.strEntityPropType;
+        _strCurrentPropertyEnumType = "NULL";
+        _strCurrentPropertyDataType = prop.strVariableType;
+
+        bNotFound = false;
+        break;
+      }
+    }
+
+    if (bNotFound) {
+      yyerror((SType("unknown property type: ") + $1).strString);
+    }
   }
   ;
 

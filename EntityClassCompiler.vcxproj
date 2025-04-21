@@ -56,28 +56,28 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Classics|Win32'">
     <ExecutablePath>$(SolutionDir)Win32\;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(ProjectDir);$(ProjectDir)Win32\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)Source\;$(ProjectDir)Win32\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
     <IntDir>Obj\$(Configuration)\</IntDir>
     <TargetName>Ecc</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ClassicsEnhanced|Win32'">
     <ExecutablePath>$(SolutionDir)Win32\;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(ProjectDir);$(ProjectDir)Win32\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)Source\;$(ProjectDir)Win32\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
     <IntDir>Obj\$(Configuration)\</IntDir>
     <TargetName>Ecc</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SSR|Win32'">
     <ExecutablePath>$(SolutionDir)Win32\;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(ProjectDir);$(ProjectDir)Win32\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)Source\;$(ProjectDir)Win32\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
     <IntDir>Obj\$(Configuration)\</IntDir>
     <TargetName>Ecc</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SE150|Win32'">
     <ExecutablePath>$(SolutionDir)Win32\;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(ProjectDir);$(ProjectDir)Win32\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)Source\;$(ProjectDir)Win32\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
     <IntDir>Obj\$(Configuration)\</IntDir>
     <TargetName>Ecc</TargetName>

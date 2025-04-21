@@ -32,6 +32,9 @@ bool _bCompatibilityMode = false;
 // [Cecil] Export class from the library without specifying it in code
 bool _bForceExport = false;
 
+// [Cecil] Defined property types for the compiler
+std::list<SConfigProperty> _aConfigProps;
+
 // [Cecil] Output file for the list of property references
 static char *_strPropListFile = "";
 
@@ -441,6 +444,14 @@ int main(int argc, char *argv[]) {
       "  #define ENTITYPROPERTYREF_DECL static\n"
       "#endif\n"
     );
+  }
+
+  // [Cecil] Fill list of property types with default types
+  extern SConfigProperty _aDefaultConfigProps[];
+  extern size_t _ctDefaultConfigProps;
+
+  for (size_t iProp = 0; iProp < _ctDefaultConfigProps; iProp++) {
+    _aConfigProps.push_back(_aDefaultConfigProps[iProp]);
   }
 
   // Parse input file and generate the output files
